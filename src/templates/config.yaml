@@ -1,0 +1,25 @@
+name: {{name}}
+type: drupal8
+docroot: web
+php_version: "7.4"
+webserver_type: nginx-fpm
+router_http_port: "{{httpPort}}"
+router_https_port: "{{httpsPort}}"
+xdebug_enabled: false
+additional_hostnames: []
+additional_fqdns: []
+mariadb_version: "10.5"
+nfs_mount_enabled: false
+provider: default
+use_dns_when_possible: true
+timezone: ""
+project_tld: {{name}}
+{{#unless isLocal}}
+omit_containers: ["ddev-ssh-agent", "dba"]
+{{/unless}}
+{{#if isLocal}}
+omit_containers: ["ddev-ssh-agent"]
+phpmyadmin_port: "9876"
+{{/if}} 
+host_db_port: "{{hostDbPort}}"
+composer_version: "2"

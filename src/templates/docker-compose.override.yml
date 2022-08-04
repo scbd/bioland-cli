@@ -1,0 +1,118 @@
+version: '3.6'
+services:
+  web:
+    labels:
+      - traefik.enable=true
+      ## HTTP Services
+      - traefik.http.services.{{name}}-svc.loadbalancer.server.port=80
+
+      ## Redirects
+  # {{#if redirects}}
+  #   {{#each redirects as |rdr index|}}
+  #     {{#each rdr as |from to|}}
+  #     - traefik.http.middlewares.rdr-{{index}}.redirectregex.regex=https://{{to}}/$${1}
+  #     - traefik.http.middlewares.rdr-{{index}}.redirectregex.replacement=^https://{{from}}/(.*)
+  #     - traefik.http.middlewares.rdr-{{index}}.redirectregex.permanent=true
+
+  #     - traefik.http.routers.rdr-{{index}}-rtr.entrypoints=https
+  #     - traefik.http.routers.rdr-{{index}}-rtr.rule=Host(`{{to}}`)
+  #     - traefik.http.routers.rdr-{{index}}-rtr.service=prod-svc
+  #     - traefik.http.routers.rdr-{{index}}-rtr.priority=2
+  #     - traefik.http.routers.rdr-{{index}}-rtr.middlewares=rdr-{{index}}
+      
+  #     {{/each}}
+  #   {{/each}}
+  # {{/if}}
+
+      ## HTTP Routers router.name = b-${branchName}-${subDomain}-${countryCode} // uniqure router definition via name
+
+  {{#each sites as |site code|}}
+    {{#if site.redirectTo}}
+      ## {{code}} => main url {{site.redirectTo}}
+      - traefik.http.routers.b-{{../name}}-{{code}}-redirect-base-rtr.entrypoints=https
+      - traefik.http.routers.b-{{../name}}-{{code}}-redirect-base-rtr.rule=Host(`{{site.redirectTo}}`)
+      - traefik.http.routers.b-{{../name}}-{{code}}-redirect-base-rtr.service={{../name}}-svc
+      - traefik.http.routers.b-{{../name}}-{{code}}-redirect-base-rtr.priority={{../routePriority}}
+
+    {{/if}}
+    {{#unless site.redirectTo}}
+      {{#unless site.environment}}
+      ## {{code}} => {{code}}.chm-cbd.net
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.regex=https://^http://{{code}}.test.chm-cbd.net/(.*)
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.replacement=https://^http://{{code}}.chm-cbd.net/(.*)
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.permanent=true
+
+      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.entrypoints=https
+      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.rule=Host(`{{code}}.chm-cbd.net`)
+      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.service={{../name}}-svc
+      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.priority={{../routePriority}}
+      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.middlewares=b-{{../name}}-{{code}}-mw
+      {{/unless}}
+      {{#if site.environment}}
+      ## {{code}} => {{code}}.test.chm-cbd.net
+      - traefik.http.routers.b-{{../name}}-{{code}}-t-rtr.entrypoints=https
+      - traefik.http.routers.b-{{../name}}-{{code}}-t-rtr.rule=Host(`{{code}}.test.chm-cbd.net`)
+      - traefik.http.routers.b-{{../name}}-{{code}}-t-rtr.service={{../name}}-svc
+      - traefik.http.routers.b-{{../name}}-{{code}}-t-rtr.priority={{../routePriority}}
+      {{/if}}
+    {{/unless}}
+    {{#if site.redirectTo}}
+      ## {{code}} => {{code}}.chm-cbd.net redirect to {{site.redirectTo}}
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.regex=https://^http://{{code}}.chm-cbd.net/(.*)
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.replacement=https://{{site.redirectTo}}$${1}
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.permanent=true
+
+      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.entrypoints=https
+      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.rule=Host(`{{code}}.chm-cbd.net`)
+      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.service={{../name}}-svc
+      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.priority=0
+      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.middlewares=b-{{../name}}-{{code}}-mw
+    {{/if}}
+
+    {{#each site.urls as |url index|}}
+      {{#unless site.redirectTo}}
+      ## {{code}} => {{url}}
+      - traefik.http.routers.b-{{../../name}}-{{code}}-{{index}}-rtr.entrypoints=https
+      - traefik.http.routers.b-{{../../name}}-{{code}}-{{index}}-rtr.rule=Host(`{{url}}`)
+      - traefik.http.routers.b-{{../../name}}-{{code}}-{{index}}-rtr.service={{../../name}}-svc
+      - traefik.http.routers.b-{{../../name}}-{{code}}-{{index}}-rtr.priority={{../../routePriority}}
+
+      {{/unless}}
+      {{#if site.redirectTo}}
+      ## {{code}} => {{url}} redirect to {{site.redirectTo}}
+      - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.regex=https://^http://{{url}}/(.*)
+      - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.replacement=https://{{site.redirectTo}}$${1}
+      - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.permanent=true
+
+      - traefik.http.routers.b-{{../../name}}-{{code}}-{{index}}-rtr.entrypoints=https
+      - traefik.http.routers.b-{{../../name}}-{{code}}-{{index}}-rtr.rule=Host(`{{url}}`)
+      - traefik.http.routers.b-{{../../name}}-{{code}}-{{index}}-rtr.service={{../../name}}-svc
+      - traefik.http.routers.b-{{../../name}}-{{code}}-{{index}}-rtr.priority=0
+      - traefik.http.routers.b-{{../../name}}-{{code}}-{{index}}-rtr.middlewares=b-{{../../name}}-{{code}}-{{index}}-mw
+
+      {{/if}}
+    {{/each}}
+  {{/each}}
+    external_links:
+      - load-balancer_traefik_1
+    networks:
+      - webgateway
+      - ddev_default
+{{#unless isLocal}}
+  db:
+    deploy:
+      resources:
+          limits:
+            cpus: "0.50"
+            memory: 1536M
+{{/unless}}
+networks:
+  webgateway:
+    external: true
+    name: webgateway
+  ddev_default:
+    external: true
+    name: ddev_default
+  default:
+    external:
+      name: webgateway

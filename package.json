@@ -1,0 +1,20 @@
+{
+  "name": "bioland-cli",
+  "version": "1.0.0",
+  "main": "src/index.mjs",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "2.1189.0",
+    "bioland-config": "https://github.com/scbd/bioland-config.git",
+    "change-case": "^4.1.2",
+    "consola": "2.15.3",
+    "fs-extra": "10.1.0",
+    "handlebars": "^4.7.7",
+    "ora": "6.1.2",
+    "superagent": "8.0.0"
+  },
+  "bin": {
+    "bioland-cli": "bin/bioland-cli.mjs",
+    "bcli": "bin/bioland-cli.mjs"
+  }
+}
