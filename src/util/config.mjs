@@ -7,9 +7,11 @@ const { commandArgs }      = getAllUserArgs()
 
 async function getConfigFromFile(){
   const flagIndex  = commandArgs.indexOf('-c')
-  const pathIndex  = flagIndex + 1
-  const configPath = commandArgs[pathIndex] || BCLI_CONFIG_PATH
+  const pathIndex  = flagIndex>-1? flagIndex + 1 : undefined
+  const configPath = pathIndex? commandArgs[pathIndex] : BCLI_CONFIG_PATH
   const exists     = fileExists(configPath)
+
+
 
   return exists? (await importJsFile(configPath)).default :  configGit
 }

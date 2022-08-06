@@ -55,14 +55,17 @@ export function backUpSite(site, { preDrupalUpgrade } = { preDrupalUpgrade: fals
   consola.info(`${site}: dumped and files tared and gzipped`)
 
   // if(isLocal) return //do not send to s3
+  console.log('')
+  consola.info(`${site}: transfering to ${S3_URL_YEAR_MONTH}/${site}/${site}-${dateTime}-site`)
   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}-site${preDrupalUpgradeFlag}.tgz" "${S3_URL_YEAR_MONTH}/${site}/${site}-${dateTime}-site${preDrupalUpgradeFlag}.tgz"`)
   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}${preDrupalUpgradeFlag}.sql.gz" "${S3_URL_YEAR_MONTH}/${site}/${site}-${dateTime}${preDrupalUpgradeFlag}.sql.gz"`)
-
+  consola.success(`${site}: transfed to ${S3_URL_YEAR_MONTH}/${site}/${site}-${dateTime}-site`)
 
   console.log('')
-  consola.info(`${site}: transfered to ${S3_URL_YEAR_MONTH}/${site}/${site}-${dateTime}`)
+  consola.info(`${site}: transfering to s3://biolands/latest/${site}-latest-`)
   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}-site${preDrupalUpgradeFlag}.tgz" "s3://biolands/latest/${site}-latest-site${preDrupalUpgradeFlag}.tgz"`)
   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}${preDrupalUpgradeFlag}.sql.gz" "s3://biolands/latest/${site}-latest${preDrupalUpgradeFlag}.sql.gz"`)
+  consola.success(`${site}: transfed to s3://biolands/latest/${site}-latest-`)
 
   console.log('')
   consola.info(`${site}: transfered to ${S3_URL}}/${site}-latest-*`)

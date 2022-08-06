@@ -1,5 +1,7 @@
-import request from 'superagent'
-import allCodes from './all-country-codes.mjs'
+import consola from 'consola'
+import   request    from 'superagent'
+import   allCodes   from './all-country-codes.mjs'
+
 const globals = {}
 
 export const getCountries = async ()=>{
@@ -19,11 +21,22 @@ export const getCountries = async ()=>{
   return cMap
 }
 
+export const getCountryNameByCode = async(code, locale = 'en') => {
+  const countriesData = await getCountries()
+  const country       = countriesData[code.toLowerCase()]
+
+  if(!country) throw new Error(`getCountryName: country not found code = ${code}`)
+
+  return country.name[locale.toLowerCase()]
+}
+
+
 
 export const getIsoAlpha3 = (code) =>{
   if(code==='eu') return 'EU'
   if(code==='acb') return 'PHL'
   
+
   if(!code) throw new Error('getIsoAlpha3: passed code undefined')
 
   const country = (allCodes.filter((c) => c['alpha-2'] === code.toUpperCase()))[0]

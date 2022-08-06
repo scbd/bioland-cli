@@ -13,4 +13,5 @@ async function runTaskAsChildProcess(){
 
   Util.notifyDone()()
   process.exit(0)
+
 }

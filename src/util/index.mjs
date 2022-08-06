@@ -7,5 +7,9 @@ export { getCommand   , getBranch    , getArgs    , getAllUserArgs              
 export { readTemplate , readFile     , writeFile  , writeDdevFile , replaceInFile, importJsFile } from './files.mjs'
 
 
-export { getCountries, getIsoAlpha3 } from './countries.mjs'
+export { getCountries, getIsoAlpha3, getCountryNameByCode  } from './countries.mjs'
 export { config                     } from './config.mjs'
+export { translate, translateCountryName  } from './i18n/index.mjs'
+export { getSiteLocales } from './db.mjs'
+export { setConfigObject, getConfigObject } from './drupal-config.mjs'
+export { setTitleAndSlogan, setLogo, biolandFooterLabel, setRegionalSettings, setGA, setEuCompliance, setGbifStats, enableGbifStats, setDefaultCountry } from './bioland/index.mjs'

@@ -1,16 +1,16 @@
-
 import { notifyDone, runTask } from '../util/cli-feedback.mjs'
 import { execSync   }          from 'child_process'
 import   config                from '../util/config.mjs'
 import { webCtx     }          from '../util/context.mjs'
-import consola from 'consola'
+import   consola               from 'consola'
+
 export default async(branch, args) => {
-consola.info('=========', args)
+
   if(args.length)
     await (runTask(branch))(cache, `${branch.toUpperCase()}: Rebuilding cache site: ${args[0]}`, args)
   else
     await (runTask(branch))(cacheAll, `${branch.toUpperCase()}: Rebuilding cache  ALL sites`)
-    
+
   notifyDone()()
   process.exit(0)
 }
@@ -25,8 +25,7 @@ function cacheAll() {
 }
 
 
-function cache( site) {
-consola.warn('site', site)
+function cache(site) {
   execSync(`cd ${webCtx}`)
 
   console.log('')
