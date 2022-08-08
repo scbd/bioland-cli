@@ -3,6 +3,7 @@ import { getConfigObject, setConfigObject } from '../drupal-config.mjs'
 import { getCountryNameByCode, getCountries } from '../countries.mjs'
 import { translate } from '../i18n/index.mjs'
 import config from '../config.mjs'
+import { webCtx     }          from '../context.mjs'
 import consola from 'consola'
 import countryTimeZone from 'countries-and-timezones'
 import { execSync,spawnSync   }          from 'child_process'
@@ -18,25 +19,22 @@ import { execSync,spawnSync   }          from 'child_process'
 export async function setDefaultCountry(countryCode){
     const uuid = await getDrupalCountryId(countryCode)
 
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.news.field_countries`, 'dependencies.content.0', `taxonomy_term:countries:${uuid}`])
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.news.field_countries`, 'default_value.0', {"target_uuid":`"${uuid}"`}])
-  
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.event.field_countries`, 'dependencies.content.0', `taxonomy_term:countries:${uuid}`])
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.event.field_countries`, 'default_value.0', {"target_uuid":`"${uuid}"`}])
-  
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.project.field_countries`, 'dependencies.content.0', `taxonomy_term:countries:${uuid}`])
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.project.field_countries`, 'default_value.0', {"target_uuid":`"${uuid}"`}])
-  
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.organization.field_countries`, 'dependencies.content.0', `taxonomy_term:countries:${uuid}`])
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.organization.field_countries`, 'default_value.0', {"target_uuid":`"${uuid}"`}])
-  
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.document.field_countries`, 'dependencies.content.0', `taxonomy_term:countries:${uuid}`])
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.document.field_countries`, 'default_value.0', {"target_uuid":`"${uuid}"`}])
-  
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.link.field_countries`, 'dependencies.content.0', `taxonomy_term:countries:${uuid}`])
-    spawnSync('ddev',['drush', '-y', `@${countryCode}`, 'cset', `field.field.node.link.field_countries`, 'default_value.0', {"target_uuid":`"${uuid}"`}])
+    const configKeys = [ 
+                            'field.field.node.news.field_countries',
+                            'field.field.node.event.field_countries',
+                            'field.field.node.project.field_countries',
+                            'field.field.node.organization.field_countries',
+                            'field.field.node.document.field_countries',
+                            'field.field.node.link.field_countries'
+    ]
 
-   consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: default country set`)
+    for (const configKey of configKeys) {
+       await  addDefaultCountry(countryCode, configKey, uuid)
+    }
+
+    execSync(`cd ${webCtx}`)
+    execSync(`ddev drush @${countryCode} cr`)
+
 }
 
 export async function enableGbifStats(countryCode){
@@ -192,4 +190,17 @@ export async function setTitleAndSlogan({ countryCode }){
 
 function isEnglish(locale){
     return locale === 'en' || !locale
+}
+
+async function addDefaultCountry(countryCode, configKey, countryUuid){
+    const nameEnglish = (await  getCountryNameByCode(countryCode))
+    const target_uuid = countryUuid
+    const configObj   = (await getConfigObject(countryCode, configKey))
+
+    configObj.default_value        = [ { target_uuid } ]
+    configObj.dependencies.content = [ `taxonomy_term:countries:${target_uuid}` ]
+
+    await setConfigObject(countryCode, configKey, configObj)
+
+    consola.info(`${countryCode} - ${nameEnglish}: default country set for ${configKey} `)
 }
