@@ -10,6 +10,6 @@ export { readTemplate , readFile     , writeFile  , writeDdevFile , replaceInFil
 export { getCountries, getIsoAlpha3, getCountryNameByCode  } from './countries.mjs'
 export { config                     } from './config.mjs'
 export { translate, translateCountryName  } from './i18n/index.mjs'
-export { getSiteLocales } from './db.mjs'
+export { getSiteLocales, dbGet, dbSet } from './db.mjs'
 export { setConfigObject, getConfigObject } from './drupal-config.mjs'
 export { setTitleAndSlogan, setLogo, biolandFooterLabel, setRegionalSettings, setGA, setEuCompliance, setGbifStats, enableGbifStats, setDefaultCountry } from './bioland/index.mjs'

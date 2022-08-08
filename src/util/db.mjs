@@ -2,6 +2,65 @@ import consola       from 'consola'
 import mariadb       from 'mariadb'
 import isPlainObject from 'lodash.isplainobject'
 import { getCountryNameByCode } from './countries.mjs'
+
+//
+
+export const dbSet  = async (dbName, queryText, queryVars) =>{
+    const db = { connection: undefined }
+    try{
+        const pool = mariadb.createPool({
+                                            host           : '127.0.0.1',
+                                            port           : parseInt(3600),
+                                            user           : 'db',
+                                            password       : 'db',
+                                            database       : dbName,
+                                            connectionLimit: 5
+                                        });
+
+
+
+        db.connection  = await pool.getConnection();
+
+        const response    = await db.connection.query(queryText, queryVars);
+
+        if(!response.affectedRows) throw new Error(`dbQuery: NOT FOUND ... ${queryText} : values => ${JSOn.stringify(queryVars)}`)
+
+        return !!response.affectedRows
+    }catch(e){
+        consola.error(e)
+    } finally {
+	    if (!db.connection) return 
+
+        db.connection.release(); //release to pool
+    }
+}
+
+export const dbGet  =  async (dbName, queryString) =>{
+    const db = { connection: undefined }
+    try{
+        const pool = mariadb.createPool({
+                                            host           : '127.0.0.1',
+                                            port           : parseInt(3600),
+                                            user           : 'db',
+                                            password       : 'db',
+                                            database       : dbName,
+                                            connectionLimit: 5
+                                        });
+
+
+
+        db.connection  = await pool.getConnection();
+
+        return db.connection.query(queryString)
+    }catch(e){
+        consola.error(e)
+    } finally {
+	    if (!db.connection) return 
+
+        db.connection.release(); //release to pool
+    }
+}
+
 export async function getSiteLocales(code){
     const pool = mariadb.createPool({
                                         host           : '127.0.0.1',
