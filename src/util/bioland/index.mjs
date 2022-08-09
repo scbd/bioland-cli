@@ -137,12 +137,17 @@ export async function biolandFooterLabel(countryCode){
 
     for (const locale of locales) {
         if (locale === 'en') continue
-        const configObj   = (await getConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', locale)) || { settings: { label: ''}}
-        const name = (await  getCountryNameByCode(countryCode, locale || 'en')) || translate((await  getCountryNameByCode(countryCode)), locale)
+        const configObj   = (await getConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', locale)) || { }
+        const exists      = Object.keys(configObj).length
+
+        if(!exists) configObj.settings = { label: ''}
+
+        const name  = (await  getCountryNameByCode(countryCode, locale || 'en')) || translate((await  getCountryNameByCode(countryCode)), locale)
         
         configObj.settings.label = name
 
-        await setConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, locale)
+        if(exists) await setConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, locale)
+        if(!exists) await createConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, locale)
 
         consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: footer label set for language ${locale || 'en'}`)
     }
@@ -171,16 +176,19 @@ export async function setTitleAndSlogan({ countryCode }){
 
     for (const locale of locales) {
         if (locale === 'en') continue
-        const configObj   = await getConfigObject(countryCode,'system.site', locale)
+        const configObj   = await getConfigObject(countryCode,'system.site', locale) || {}
 
+        const exists      = Object.keys(configObj).length
         const nameEnglish = (await  getCountryNameByCode(countryCode)) + ' Biodiversity'
         const slogan      = 'National Clearing House Mechanism'
 
         configObj.name   = isEnglish(locale)? nameEnglish : await translate(nameEnglish, locale)
         configObj.slogan = isEnglish(locale)? slogan : await translate(slogan, locale)
 
-        await setConfigObject(countryCode,'system.site', configObj, locale)
-
+        if(exists)
+            await setConfigObject(countryCode,'system.site', configObj, locale)
+        else
+            await createConfigObject(countryCode,'system.site', configObj, locale)
         consola.info(`${countryCode} - ${nameEnglish}: name and slogan updated for language ${locale||'en'}`)
     }
 }

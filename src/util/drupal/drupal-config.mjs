@@ -25,6 +25,29 @@ export async function setConfigObject(code, name, configObject, locale=''){
     }
 }
 
+export async function createConfigObject(code, name, configObject, locale=''){
+
+    try{
+        await getPool(code)
+        const phpSerializedConfigObject = phpSerialize(configObject)
+
+        const db = await getConnection(code)
+
+        const collection  = !locale? locale: `language.${locale}`
+        const queryText   = `INSERT INTO ${site}.config (collection, name, data) VALUES (${collection}, ${name}, ?);`
+        //'UPDATE config SET  data = ? where name = ? and collection = ?'
+        const queryVars   = [ data ]
+        const response    = await db.query(queryText, queryVars);
+
+        if(!response.affectedRows) throw new Error(`createConfigObject: `)
+
+        return !!response.affectedRows
+    }catch(e){
+        consola.error(e)
+    } finally {
+       await releaseConnection(code)
+    }
+}
 
 export async function getConfigObject(code, name, locale=''){
 
