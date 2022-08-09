@@ -57,7 +57,7 @@ export async function importGlossaryData(){
 
     const glossaryObj = await S3.getObject({ Bucket: 'bioland-static', Key: 'i18n.mjs'}).promise()
 
-    globals.tmpDir = `${tmpdir()}\i18n.mjs`
+    globals.tmpDir = `${tmpdir()}/i18n.mjs`
 
     fs.writeFileSync(globals.tmpDir, glossaryObj.Body)
 
