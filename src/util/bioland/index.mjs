@@ -1,5 +1,5 @@
-import { getSiteLocales, getDrupalCountryId } from '../db.mjs'
-import { getConfigObject, setConfigObject } from '../drupal-config.mjs'
+import { getSiteLocales, getDrupalCountryId } from '../drupal/db.mjs'
+import { getConfigObject, setConfigObject } from '../drupal/drupal-config.mjs'
 import { getCountryNameByCode, getCountries } from '../countries.mjs'
 import { translate } from '../i18n/index.mjs'
 import config from '../config.mjs'
@@ -15,6 +15,7 @@ import { execSync,spawnSync   }          from 'child_process'
 //menu_ui.settings
 //system.maintenance
 //system.menu.main
+
 
 export async function setDefaultCountry(countryCode){
     const uuid = await getDrupalCountryId(countryCode)
@@ -49,10 +50,6 @@ export async function enableGbifStats(countryCode){
 }
 
 export async function setGbifStats(countryCode){
-    // const { sites }  = config
-    // const site = sites[countryCode]
-
-    // // if(!site.euCompliance) return
 
     const configObj   = (await getConfigObject(countryCode,'gbifstats.settings'))
 
@@ -124,7 +121,7 @@ export async function setRegionalSettings(countryCode){
     configObj.timezone.default = zone
 
     await setConfigObject(countryCode,'system.date', configObj)
-     consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: regional setting set ${locale || 'en'}`)
+    consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: regional setting set `)
 }
 
 export async function biolandFooterLabel(countryCode){

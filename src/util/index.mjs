@@ -8,8 +8,11 @@ export { readTemplate , readFile     , writeFile  , writeDdevFile , replaceInFil
 
 
 export { getCountries, getIsoAlpha3, getCountryNameByCode  } from './countries.mjs'
-export { config                     } from './config.mjs'
+export { config } from './config.mjs'
 export { translate, translateCountryName  } from './i18n/index.mjs'
-export { getSiteLocales, dbGet, dbSet } from './db.mjs'
-export { setConfigObject, getConfigObject } from './drupal-config.mjs'
+export { getSiteLocales, dbGet, dbSet } from './drupal/db.mjs'
+export { patchMenuUri, login, deleteMenu, enableJsonApi, disableJsonApi, patch, deleteNode } from './drupal/json-api.mjs'
+export { setConfigObject, getConfigObject } from './drupal/drupal-config.mjs'
+export { forEachSite, forEachTestSite, forEachProductionSite, forEachPtkMigratedSite } from './for-each-site.mjs'
 export { setTitleAndSlogan, setLogo, biolandFooterLabel, setRegionalSettings, setGA, setEuCompliance, setGbifStats, enableGbifStats, setDefaultCountry } from './bioland/index.mjs'
+export { changeUserPass, createUser, removeUser, addUserRole, removeUserRole } from './drupal/users.mjs'
