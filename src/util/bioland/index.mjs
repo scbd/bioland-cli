@@ -1,5 +1,5 @@
 import { getSiteLocales, getDrupalCountryId } from '../drupal/db.mjs'
-import { getConfigObject, setConfigObject } from '../drupal/drupal-config.mjs'
+import { getConfigObject, setConfigObject, createConfigObject } from '../drupal/drupal-config.mjs'
 import { getCountryNameByCode, getCountries } from '../countries.mjs'
 import { translate } from '../i18n/index.mjs'
 import config from '../config.mjs'
