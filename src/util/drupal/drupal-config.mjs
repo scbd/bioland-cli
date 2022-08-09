@@ -34,7 +34,7 @@ export async function createConfigObject(code, name, configObject, locale=''){
         const db = await getConnection(code)
 
         const collection  = !locale? locale: `language.${locale}`
-        const queryText   = `INSERT INTO ${site}.config (collection, name, data) VALUES (${collection}, ${name}, ?);`
+        const queryText   = `INSERT INTO ${code}.config (collection, name, data) VALUES (${collection}, ${name}, ?);`
         //'UPDATE config SET  data = ? where name = ? and collection = ?'
         const queryVars   = [ data ]
         const response    = await db.query(queryText, queryVars);
