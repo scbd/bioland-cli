@@ -78,13 +78,13 @@ export function enableJsonApi(site){
 
   spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'en', 'jsonapi' ])
 
-  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'cset', 'jsonapi.settings', 'read_only', `--format=boolean`, `--value=0` ])
+  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'cset', 'jsonapi.settings', 'read_only', `--format=boolean`, `--value=1` ])
   execSync(`ddev drush @${site} cr`)
 }
 
 export function disableJsonApi(site){
 
-  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'cset', 'jsonapi.settings', 'read_only', `--format=boolean`, `--value=1` ])
+  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'cset', 'jsonapi.settings', 'read_only', `--format=boolean`, `--value=0` ])
   spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'pm:uninstall', 'jsonapi' ])
 
   execSync(`ddev drush @${site} cr`)
