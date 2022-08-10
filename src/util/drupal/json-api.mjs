@@ -1,4 +1,5 @@
 import { spawnSync, execSync } from 'child_process'
+export { setConfigObject, getConfigObject } from './drupal/drupal-config.mjs'
 
 import SA      from 'superagent'
 import config  from '../config.mjs'
@@ -76,19 +77,29 @@ export async function deleteMenu(site, id, locale){
   }catch(e){}
 }
 
-export function enableJsonApi(site){
+export async function enableJsonApi(site){
 
 
   spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'en', 'jsonapi' ])
 
-  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'cset', 'jsonapi.settings', 'read_only', `--format=boolean`, `--value=0` ])
+  const configObj   = await getConfigObject(site,'jsonapi.setting')
+
+  configObj.read_only = 0
+
+  await setConfigObject(site,'jsonapi.setting', configObj)
+
   execSync(`ddev drush @${site} cr`)
 }
 
 export function disableJsonApi(site){
 
-  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'cset', 'jsonapi.settings', 'read_only', `--format=boolean`, `--value=1` ])
-  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'pm:uninstall', 'jsonapi' ])
+  const configObj   = await getConfigObject(site,'jsonapi.setting')
+
+  configObj.read_only = 1
+
+  await setConfigObject(site,'jsonapi.setting', configObj)
+
+  // spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'pm:uninstall', 'jsonapi' ])
 
   execSync(`ddev drush @${site} cr`)
 }
