@@ -98,3 +98,27 @@ export async function getDefaultLocale(code){
        await releaseConnection(code)
     }
 }
+
+export async function enableJsonApiConfig(site){
+
+    const configObj   = await getConfigObject(site,'jsonapi.setting')
+  
+    configObj.read_only = 0
+  
+    await setConfigObject(site,'jsonapi.setting', configObj)
+  
+    // execSync(`ddev drush @${site} cr`)
+  }
+  
+  export async function disableJsonApiConfig(site){
+  
+    const configObj   = await getConfigObject(site,'jsonapi.setting')
+  
+    configObj.read_only = 1
+  
+    await setConfigObject(site,'jsonapi.setting', configObj)
+  
+    // spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'pm:uninstall', 'jsonapi' ])
+  
+    // execSync(`ddev drush @${site} cr`)
+  }
