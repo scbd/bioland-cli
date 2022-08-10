@@ -85,11 +85,11 @@ export async function getSiteLocales(dbName){
 
     try{
         await getPool(dbName)
-        const db  = await getConnection(dbName)
+        const db       = await getConnection(dbName)
 
-        const response = await db.query('SELECT collection  FROM config')
+        const response = await db.query('SELECT language  FROM locales_target')
 
-        return cleanLangCodes(unique(response.map( ({ collection }) => collection)))
+        return unique(response.map( ({ language }) => language))
     }catch(e){
         consola.error(e)
     } finally {
@@ -140,7 +140,7 @@ export async function getDrupalCountryId(dbName){
     return uuid
   }
 
-  function drupalTaxonomyCountryNameMap(name){
+function drupalTaxonomyCountryNameMap(name){
     const taxMap = {
         'United Republic of Tanzania' : 'ba6d9f84-e258-4896-8cc3-10fb4eb1ea6e'
     }
