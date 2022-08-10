@@ -36,7 +36,7 @@ export async function createConfigObject(code, name, configObject, locale=''){
         const collection  = !locale? locale: `language.${locale}`
         const queryText   = `INSERT INTO ${code}.config (collection, name, data) VALUES (?, ?, ?);`
         //'UPDATE config SET  data = ? where name = ? and collection = ?'
-        const queryVars   = [ collection, name, configObject ]
+        const queryVars   = [ collection, name, phpSerializedConfigObject ]
         const response    = await db.query(queryText, queryVars);
 
         if(!response.affectedRows) throw new Error(`createConfigObject: `)
