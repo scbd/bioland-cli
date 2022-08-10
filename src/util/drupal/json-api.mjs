@@ -91,7 +91,7 @@ export async function enableJsonApi(site){
   execSync(`ddev drush @${site} cr`)
 }
 
-export function disableJsonApi(site){
+export async function disableJsonApi(site){
 
   const configObj   = await getConfigObject(site,'jsonapi.setting')
 
