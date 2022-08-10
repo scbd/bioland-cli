@@ -121,11 +121,16 @@ function cleanLangCodes(codes){
 export async function getDrupalCountryId(dbName){
     await getPool(dbName)
     const db  = await getConnection(dbName)
-    const   countryName        =   await getCountryNameByCode(dbName)
-  
+    const   countryName        =  await getCountryNameByCode(dbName)
+
+    consola.warn(countryName)
+    
+    const mappedUuid = drupalTaxonomyCountryNameMap(countryName)
+
+    if(mappedUuid) return mappedUuid
     // create the connection
 
-    const query      = ' SELECT `uuid` FROM `taxonomy_term_field_data` JOIN `taxonomy_term_data` ON taxonomy_term_field_data.tid = taxonomy_term_data.tid WHERE `name` = ? ;'
+    const query = ' SELECT `uuid` FROM `taxonomy_term_field_data` JOIN `taxonomy_term_data` ON taxonomy_term_field_data.tid = taxonomy_term_data.tid WHERE `name` = ? ;'
   
 
     const rows  = await db.execute(query, [countryName]);
@@ -134,3 +139,11 @@ export async function getDrupalCountryId(dbName){
     await releaseConnection(dbName)
     return uuid
   }
+
+  function drupalTaxonomyCountryNameMap(name){
+    const taxMap = {
+        'United Republic of Tanzania' : 'ba6d9f84-e258-4896-8cc3-10fb4eb1ea6e'
+    }
+
+    return taxMap[name] ? taxMap[name] : ''
+}
