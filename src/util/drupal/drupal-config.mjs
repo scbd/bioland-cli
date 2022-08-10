@@ -73,3 +73,28 @@ export async function getConfigObject(code, name, locale=''){
        await releaseConnection(code)
     }
 }
+
+export async function getDefaultLocale(code){
+
+
+    try{
+        await getPool(code)
+
+        const db  = await  getConnection(code)
+
+ 
+        const response        = await db.query(`SELECT CAST(data as char) as data  FROM config WHERE name = 'system.site'`)
+
+        const data = (response.map(( { data } ) => {
+                                                        if(!data) return data
+
+                                                        return phpDeserialize(data)
+                                                    })).filter( x => x)
+
+        return data.length? data[0].default_langcode: undefined
+    }catch(e){
+        consola.error(e)
+    } finally {
+       await releaseConnection(code)
+    }
+}

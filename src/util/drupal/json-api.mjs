@@ -24,7 +24,6 @@ export async function login (site){
 
     $http.set('X-CSRF-Token', csrf_token)
 
-
     return $http
   }
   catch(e){
@@ -33,42 +32,46 @@ export async function login (site){
   }
 }
 
-export async function patch(site, path, id, data,locale='en' ){
+export async function patch(site, path, id, data,locale='' ){
   try{
     const host    = getHost(site)
 
     
-    return $http.patch(`${host}/${locale}n/jsonapi/${path}/${id}`)
+    return $http.patch(`${host}${locale? '/'+locale : ''}/jsonapi/${path}/${id}`)
                     .set('Content-Type', 'application/vnd.api+json')
                     .send(JSON.stringify(data))
-  }catch(e){}
+  }catch(e){
+    consola.error(e)
+  }
 }
 
-export async function patchMenuUri(site, id, uri, locale='en'){
+export async function patchMenuUri(site, id, uri, locale=''){
   try{
     const host    = getHost(site)
     const data    = { data: { type: "menu_link_content--menu_link_content", id, attributes: { link: { uri  } } } }
     
-    return $http.patch(`${host}/${locale}/jsonapi/menu_link_content/menu_link_content/${id}`)
+    return $http.patch(`${host}${locale? '/'+locale : ''}/jsonapi/menu_link_content/menu_link_content/${id}`)
                     .set('Content-Type', 'application/vnd.api+json')
                     .send(JSON.stringify(data))
-  }catch(e){}
+  }catch(e){
+    consola.error(e)
+  }
 }
 
-export async function deleteNode(site, path, id, locale='en'){
+export async function deleteNode(site, path, id, locale=''){
   try{
     const host    = getHost(site)
 
-    return $http.delete(`${host}/${locale}/jsonapi/${path}/${id}`)
+    return $http.delete(`${host}${locale? '/'+locale : ''}/jsonapi/${path}/${id}`)
                     .set('Content-Type', 'application/vnd.api+json')
   }catch(e){ consola.error('error')}
 }
 
-export async function deleteMenu(site, id){
+export async function deleteMenu(site, id, locale){
   try{
     const host    = getHost(site)
 
-    return $http.delete(`${host}/jsonapi/menu_link_content/menu_link_content/${id}`)
+    return $http.delete(`${host}${locale? '/'+locale : ''}/jsonapi/menu_link_content/menu_link_content/${id}`)
                     .set('Content-Type', 'application/vnd.api+json')
   }catch(e){}
 }
@@ -78,13 +81,13 @@ export function enableJsonApi(site){
 
   spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'en', 'jsonapi' ])
 
-  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'cset', 'jsonapi.settings', 'read_only', `--format=boolean`, `--value=1` ])
+  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'cset', 'jsonapi.settings', 'read_only', `--format=boolean`, `--value=0` ])
   execSync(`ddev drush @${site} cr`)
 }
 
 export function disableJsonApi(site){
 
-  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'cset', 'jsonapi.settings', 'read_only', `--format=boolean`, `--value=0` ])
+  spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'cset', 'jsonapi.settings', 'read_only', `--format=boolean`, `--value=1` ])
   spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'pm:uninstall', 'jsonapi' ])
 
   execSync(`ddev drush @${site} cr`)
