@@ -1,5 +1,5 @@
 import { spawnSync, execSync } from 'child_process'
-export { setConfigObject, getConfigObject } from './drupal/drupal-config.mjs'
+export { setConfigObject, getConfigObject } from './drupal-config.mjs'
 
 import SA      from 'superagent'
 import config  from '../config.mjs'
