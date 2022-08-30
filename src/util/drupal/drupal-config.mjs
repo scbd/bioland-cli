@@ -101,22 +101,25 @@ export async function getDefaultLocale(code){
 
 export async function enableJsonApiConfig(site){
 
-    const configObj   = await getConfigObject(site,'jsonapi.setting')
-  
+    const configExists = await getConfigObject(site,'jsonapi.settings')
+
+
+    const configObj = configExists? configExists : {}
+
     configObj.read_only = 0
-  
-    await setConfigObject(site,'jsonapi.setting', configObj)
-  
-    // execSync(`ddev drush @${site} cr`)
+
+    if(configExists) return setConfigObject(site,'jsonapi.settings', configObj)
+    
+    return createConfigObject(site, 'jsonapi.settings', configObj)
   }
   
   export async function disableJsonApiConfig(site){
   
-    const configObj   = await getConfigObject(site,'jsonapi.setting')
+    const configObj   = (await getConfigObject(site,'jsonapi.settings')) || {}
   
     configObj.read_only = 1
   
-    await setConfigObject(site,'jsonapi.setting', configObj)
+    await setConfigObject(site,'jsonapi.settings', configObj)
   
     // spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'pm:uninstall', 'jsonapi' ])
   

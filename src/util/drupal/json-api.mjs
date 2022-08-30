@@ -13,7 +13,6 @@ const { BL_API_USER_PASS, BL_API_USER } = process.env
 export async function login (site){
   try{
     // if(global[site].$http) return global[site].$http
-
     const host = getHost(site)
     const uri  = `${host}/user/login?_format=json`
 
@@ -41,6 +40,31 @@ export async function patch(site, path, id, data,locale='' ){
     return $http.patch(`${host}${locale? '/'+locale : ''}/jsonapi/${path}/${id}`)
                     .set('Content-Type', 'application/vnd.api+json')
                     .send(JSON.stringify(data))
+  }catch(e){
+    consola.error(e)
+  }
+}
+export async function post(site, path, data,locale='' ){
+  try{
+    const host    = getHost(site)
+
+    
+    return $http.post(`${host}${locale? '/'+locale : ''}/jsonapi/${path}`)
+                    .set('Content-Type', 'application/vnd.api+json')
+                    .send(JSON.stringify(data))
+  }catch(e){
+    consola.error(e)
+  }
+}
+
+export async function get(site, path, id, locale='' ){
+  try{
+    const host    = getHost(site)
+
+    
+    return $http.get(`${host}${locale? '/'+locale : ''}/jsonapi/${path}/${id}`)
+                    .set('Content-Type', 'application/vnd.api+json')
+
   }catch(e){
     consola.error(e)
   }
@@ -79,17 +103,15 @@ export async function deleteMenu(site, id, locale){
 
 export async function enableJsonApi(site){
 
-
   spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'en', 'jsonapi' ])
 
   execSync(`ddev drush @${site} cr`)
 }
 
 
-
 function getHost(site){
   const { sites                   } =       config
-  const { redirectTo, environment } = sites[site  ]
+  const { redirectTo, environment } = sites[site]
 
   if(redirectTo) return redirectTo
 

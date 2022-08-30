@@ -20,6 +20,17 @@ export function getPool(dbName){
 
     return pools[dbName]
 }
+
+export async function endPool(dbName){
+    const pool = pools[dbName]
+
+    if(!pool) return
+
+    await pool.end()
+
+    delete(pools[dbName])
+}
+
 export async function getConnection(dbName){
     if(connections[dbName]) return connections[dbName]
     
