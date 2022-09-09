@@ -6,6 +6,17 @@ services:
       ## HTTP Services
       - traefik.http.services.{{name}}-svc.loadbalancer.server.port=80
 
+      ## Manual Redirects
+      - traefik.http.middlewares.www8.redirectregex.regex=^https://www8.chm-cbd.net/(.*)
+      - traefik.http.middlewares.www8.redirectregex.replacement=https://www.chm-cbd.net/$${1}
+      - traefik.http.middlewares.www8.redirectregex.permanent=true
+
+      - traefik.http.routers.b-prod-www-10-rtr.entrypoints=https
+      - traefik.http.routers.b-prod-www-10-rtr.rule=Host(`www8.chm-cbd.net`)
+      - traefik.http.routers.b-prod-www-10-rtr.service=bioland-svc
+      - traefik.http.routers.b-prod-www-10-rtr.priority=2
+      - traefik.http.routers.b-prod-www-10-rtr.middlewares=www8
+
       ## Redirects
   # {{#if redirects}}
   #   {{#each redirects as |rdr index|}}
@@ -38,15 +49,20 @@ services:
     {{#unless site.redirectTo}}
       {{#unless site.environment}}
       ## {{code}} => {{code}}.chm-cbd.net
-      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.regex=https://^http://{{code}}.test.chm-cbd.net/(.*)
-      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.replacement=https://^http://{{code}}.chm-cbd.net/(.*)
-      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.permanent=true
-
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.entrypoints=https
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.rule=Host(`{{code}}.chm-cbd.net`)
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.service={{../name}}-svc
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.priority={{../routePriority}}
-      - traefik.http.routers.b-{{../name}}-{{code}}-rtr.middlewares=b-{{../name}}-{{code}}-mw
+
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.regex=https://^http://{{code}}.test.chm-cbd.net/(.*)
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.replacement=https://{{code}}.chm-cbd.net$${1}
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.permanent=true
+
+      - traefik.http.routers.b-{{../name}}-{{code}}-test-rtr.entrypoints=https
+      - traefik.http.routers.b-{{../name}}-{{code}}-test-rtr.rule=Host(`{{code}}.test.chm-cbd.net`)
+      - traefik.http.routers.b-{{../name}}-{{code}}-test-rtr.service={{../name}}-svc
+      - traefik.http.routers.b-{{../name}}-{{code}}-test-rtr.priority={{../routePriority}}
+      - traefik.http.routers.b-{{../name}}-{{code}}-test-rtr.middlewares=b-{{../name}}-{{code}}-mw
       {{/unless}}
       {{#if site.environment}}
       ## {{code}} => {{code}}.test.chm-cbd.net
@@ -54,6 +70,7 @@ services:
       - traefik.http.routers.b-{{../name}}-{{code}}-t-rtr.rule=Host(`{{code}}.test.chm-cbd.net`)
       - traefik.http.routers.b-{{../name}}-{{code}}-t-rtr.service={{../name}}-svc
       - traefik.http.routers.b-{{../name}}-{{code}}-t-rtr.priority={{../routePriority}}
+
       {{/if}}
     {{/unless}}
     {{#if site.redirectTo}}
@@ -114,5 +131,5 @@ networks:
     external: true
     name: ddev_default
   default:
-    external:
-      name: webgateway
+    external: true
+    name: webgateway

@@ -12,7 +12,9 @@ const { BL_API_USER_PASS, BL_API_USER } = process.env
 
 export async function login (site){
   try{
-    // if(global[site].$http) return global[site].$http
+    if(!global[site]) global[site] = {}
+    if(global[site].token) return $http.set('X-CSRF-Token', global[site].token)
+
     const host = getHost(site)
     const uri  = `${host}/user/login?_format=json`
 
@@ -22,6 +24,8 @@ export async function login (site){
 
     const { csrf_token } = body
 
+    global[site].token = csrf_token
+    
     $http.set('X-CSRF-Token', csrf_token)
 
     return $http

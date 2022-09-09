@@ -1,12 +1,14 @@
 import { getSiteLocales, getDrupalCountryId } from '../drupal/db.mjs'
-import { getConfigObject, setConfigObject, createConfigObject } from '../drupal/drupal-config.mjs'
+import { getConfigObject, setConfigObject, createConfigObject, getDefaultLocale } from '../drupal/drupal-config.mjs'
 import { getCountryNameByCode, getCountries } from '../countries.mjs'
 import { translate } from '../i18n/index.mjs'
 import config from '../config.mjs'
 import { webCtx     }          from '../context.mjs'
 import consola from 'consola'
 import countryTimeZone from 'countries-and-timezones'
-import { execSync,spawnSync   }          from 'child_process'
+import { execSync  }          from 'child_process'
+import { patchMenuUri, login } from '../drupal/json-api.mjs'
+import footerLinks from './footer-menu-content.mjs'
 //eu_cookie_compliance.settings
 //gbifstats.settings
 //geolocation.settings
@@ -16,6 +18,19 @@ import { execSync,spawnSync   }          from 'child_process'
 //system.maintenance
 //system.menu.main
 
+export async function initNewTestSite(country){
+    await setDefaultCountry(country)
+    await setGbifStats(country)
+    await setRegionalSettings(country)
+    await biolandFooterLabel(country)
+    await setTitleAndSlogan(country)
+    await setLogo(country)
+    await setFooterLinks(country)
+}
+
+export function setFooterLinks(countryCode){
+    return footerLinks(countryCode)
+}
 
 export async function setDefaultCountry(countryCode){
     const uuid = await getDrupalCountryId(countryCode)
@@ -39,13 +54,12 @@ export async function setDefaultCountry(countryCode){
 }
 
 export async function enableGbifStats(countryCode){
-    execSync(`ddev drush -y @${countryCode} en gbifstats`)
+    execSync(`ddev drush @${countryCode} en gbifstats`)
     execSync(`ddev drush @${countryCode} role-add-perm "anonymous" "'view GBIF Stats'"`)
     execSync(`ddev drush @${countryCode} role-add-perm "authenticated" "'view GBIF Stats'"`)
     execSync(`ddev drush @${countryCode} role-add-perm "content_manager" "'configure GBIF Stats','generate GBIF Stats'"`)
     execSync(`ddev drush @${countryCode} role-add-perm "site_manager" "'generate GBIF Stats','configure GBIF Stats','generate GBIF Stats'"`) 
-    execSync(`chromium-browser --headless --no-sandbox --verbose  --incognito  --ignore-certificate-errors --ignore-ssl-errors $(ddev drush @${countryCode} user:login --mail=bioland-sm@chm-cbd.net /gbifstats/generate/${countryCode.toUpperCase()})`)
-    
+
     consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: GBIF enabled`)
 }
 
@@ -59,12 +73,23 @@ export async function setGbifStats(countryCode){
     delete(configObj.head_delegation)
     delete(configObj.gbifstats.node_manager)
     delete(configObj.gbifstats.link_page_GBIF)
+
     configObj.gbifstats.country_code=countryCode.toUpperCase()
 
     await setConfigObject(countryCode,'gbifstats.settings', configObj)
 
-    
-    consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: GBIF configured`)
+    execSync(`chromium-browser --headless --no-sandbox --verbose  --incognito  --ignore-certificate-errors --ignore-ssl-errors $(ddev drush @${countryCode} user:login --mail=bioland-sm@chm-cbd.net /gbifstats/generate/${countryCode.toUpperCase()})`)
+
+    const locale               = await getDefaultLocale(countryCode)
+    const defaultLocale        = locale === 'en'? '' : 'en'
+    const countryExists        = !!(await getCountries())[countryCode]
+    const countryCodeUpperCase = countryExists? countryCode.toUpperCase() : 'FJ'
+
+    await login(countryCode)
+    await patchMenuUri(countryCode, 'a2864c79-b456-43eb-90bb-15ee0fd98da3', `internal:/gbifstats/display/${countryCodeUpperCase}`, defaultLocale)
+
+
+    consola.info(`${countryCode} - : GBIF configured`)
 }
 
 export async function setEuCompliance(countryCode){
@@ -134,20 +159,19 @@ export async function biolandFooterLabel(countryCode){
   
     const locales = await getSiteLocales(countryCode)
 
-
     for (const locale of locales) {
-        if (locale === 'en') continue
-        const configObj   = (await getConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', locale)) || { }
+        const l = locale === 'en'? '' : locale
+        const configObj   = (await getConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', l)) || { }
         const exists      = Object.keys(configObj).length
 
         if(!exists) configObj.settings = { label: ''}
 
-        const name  = (await  getCountryNameByCode(countryCode, locale || 'en')) || translate((await  getCountryNameByCode(countryCode)), locale)
+        const name  = (await  getCountryNameByCode(countryCode, l || 'en')) || await translate((await  getCountryNameByCode(countryCode)), locale)
         
         configObj.settings.label = name
-
-        if(exists) await setConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, locale)
-        if(!exists) await createConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, locale)
+        consola.warn(configObj)
+        if(exists) await setConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, l)
+        if(!exists) await createConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, l)
 
         consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: footer label set for language ${locale || 'en'}`)
     }
@@ -169,26 +193,27 @@ export async function setLogo(countryCode){
     consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: logo set`)
 }
 
-export async function setTitleAndSlogan({ countryCode }){
+export async function setTitleAndSlogan(countryCode){
     const locales = await getSiteLocales(countryCode)
 
     if(!locales) throw new Error(`No locals obtained from site ${countryCode}`)
 
     for (const locale of locales) {
-        if (locale === 'en') continue
-        const configObj   = await getConfigObject(countryCode,'system.site', locale) || {}
+        const l = locale === 'en'? '' : locale
+
+        const configObj   = await getConfigObject(countryCode,'system.site', l) || {}
 
         const exists      = Object.keys(configObj).length
         const nameEnglish = (await  getCountryNameByCode(countryCode)) + ' Biodiversity'
         const slogan      = 'National Clearing House Mechanism'
 
-        configObj.name   = isEnglish(locale)? nameEnglish : await translate(nameEnglish, locale)
-        configObj.slogan = isEnglish(locale)? slogan : await translate(slogan, locale)
+        configObj.name   = isEnglish(locale)? nameEnglish : await translate(nameEnglish, l)
+        configObj.slogan = isEnglish(locale)? slogan : await translate(slogan, l)
 
         if(exists)
-            await setConfigObject(countryCode,'system.site', configObj, locale)
+            await setConfigObject(countryCode,'system.site', configObj, l)
         else
-            await createConfigObject(countryCode,'system.site', configObj, locale)
+            await createConfigObject(countryCode,'system.site', configObj, l)
         consola.info(`${countryCode} - ${nameEnglish}: name and slogan updated for language ${locale||'en'}`)
     }
 }
@@ -209,3 +234,4 @@ async function addDefaultCountry(countryCode, configKey, countryUuid){
 
     consola.info(`${countryCode} - ${nameEnglish}: default country set for ${configKey} `)
 }
+
