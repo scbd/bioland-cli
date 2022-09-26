@@ -56,7 +56,7 @@ function getSitesPhpTemplate(sites, isDev){
       for (const baseUrl of sites[code].urls) 
         templateString += `$sites["${baseUrl}"] = "${code}";\n`
 
-    if(isDev) templateString += `$sites["${code}.cbddev.xyz"] = "${code}";\n`;
+    if(isDev) templateString += `$sites["${code}.bioland.cbddev.xyz"] = "${code}";\n`;
 
     templateString += `\n`
   }
