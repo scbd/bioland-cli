@@ -89,6 +89,9 @@ export async function setGbifStats(countryCode){
     await patchMenuUri(countryCode, 'a2864c79-b456-43eb-90bb-15ee0fd98da3', `internal:/gbifstats/display/${countryCodeUpperCase}`, defaultLocale)
 
     execSync(`chromium-browser --headless --no-sandbox --verbose  --incognito  --ignore-certificate-errors --ignore-ssl-errors $(ddev drush @${countryCode} user:login --mail=bioland-sm@chm-cbd.net /gbifstats/generate/${countryCode.toUpperCase()})`)
+
+    execSync(`cd ${webCtx}`)
+    execSync(`ddev drush @${countryCode} cr`)
     consola.info(`${countryCode} - : GBIF configured`)
 }
 
