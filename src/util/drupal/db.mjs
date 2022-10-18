@@ -97,9 +97,10 @@ export async function getSiteLocales(dbName){
     try{
         await getPool(dbName)
         const db       = await getConnection(dbName)
-
         const response = await db.query('SELECT language  FROM locales_target')
 
+        response.push({ language: 'en' })
+    
         return unique(response.map( ({ language }) => language))
     }catch(e){
         consola.error(e)
