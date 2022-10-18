@@ -73,7 +73,7 @@ export async function setGbifStats(countryCode){
     delete(configObj.head_delegation)
     delete(configObj.gbifstats.node_manager)
     delete(configObj.gbifstats.link_page_GBIF)
-
+    configObj.gbifstats.last_dataset=0
     configObj.gbifstats.country_code=countryCode.toUpperCase()
 
     await setConfigObject(countryCode,'gbifstats.settings', configObj)
@@ -88,7 +88,7 @@ export async function setGbifStats(countryCode){
     await login(countryCode)
     await patchMenuUri(countryCode, 'a2864c79-b456-43eb-90bb-15ee0fd98da3', `internal:/gbifstats/display/${countryCodeUpperCase}`, defaultLocale)
 
-
+    execSync(`chromium-browser --headless --no-sandbox --verbose  --incognito  --ignore-certificate-errors --ignore-ssl-errors $(ddev drush @${countryCode} user:login --mail=bioland-sm@chm-cbd.net /gbifstats/generate/${countryCode.toUpperCase()})`)
     consola.info(`${countryCode} - : GBIF configured`)
 }
 
