@@ -21,7 +21,7 @@ async function updateCbdProfile(site){
 
   const url = `https://www.cbd.int/countries/?country=${isCountry? site : 'fj'}`
 
-  return patchMenuUri(site, id, url, 'en')
+  return patchMenuUri(site, id, url)
 }
 
 //
@@ -35,7 +35,7 @@ async function updateGefLink(site){
   
   const url = `http://www.thegef.org/projects-operations/database?f%5B0%5D=regional_country_list%3A${gefCode}`
 
-  return patchMenuUri(site, id, url, 'en')
+  return patchMenuUri(site, id, url)
 }
 
 async function updateInformeaLink(site){
@@ -46,7 +46,7 @@ async function updateInformeaLink(site){
 
   const url = `https://www.informea.org/countries/${isCountry? site : 'fj'}`
 
-  return patchMenuUri(site, id, url, 'en')
+  return patchMenuUri(site, id, url)
 }
 
 async function updateUnepLink(site){
@@ -57,7 +57,7 @@ async function updateUnepLink(site){
 
   const url = `https://uneplive.unep.org/country/index/${isCountry? site : 'fj'}`
 
-  return patchMenuUri(site, id, url, 'en')
+  return patchMenuUri(site, id, url)
 }
 
 async function updateUnLink(site){
@@ -68,7 +68,7 @@ async function updateUnLink(site){
 
   const url = `https://data.un.org/en/iso/${isCountry? site : 'fj'}.html`
 
-  return patchMenuUri(site, id, url, 'en')
+  return patchMenuUri(site, id, url)
 }
 
 async function updateNSLink(site){
@@ -80,7 +80,7 @@ async function updateNSLink(site){
   const isoA3 = getIsoAlpha3(isCountry? site : 'fj')
   const url   = `https://bipdashboard.natureserve.org/CountrySummaries/${isoA3}_Summary.pdf`
 
-  return patchMenuUri(site, id, url, 'en')
+  return patchMenuUri(site, id, url)
 }
 
 function getGefCountryCode(code) {
