@@ -73,7 +73,7 @@ export async function setGbifStats(countryCode){
     delete(configObj.head_delegation)
     delete(configObj.gbifstats.node_manager)
     delete(configObj.gbifstats.link_page_GBIF)
-    configObj.gbifstats.last_dataset=0
+    configObj.gbifstats.categories.last_dataset=0
     configObj.gbifstats.country_code=countryCode.toUpperCase()
 
     await setConfigObject(countryCode,'gbifstats.settings', configObj)
