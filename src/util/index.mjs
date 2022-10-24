@@ -16,3 +16,4 @@ export { setConfigObject, getConfigObject, createConfigObject, getDefaultLocale,
 export { forEachSite, forEachTestSite, forEachProductionSite, forEachPtkMigratedSite } from './for-each-site.mjs'
 export { initNewTestSite, setTitleAndSlogan, setLogo, biolandFooterLabel, setRegionalSettings, setGA, setEuCompliance, setGbifStats, enableGbifStats, setDefaultCountry, setFooterLinks } from './bioland/index.mjs'
 export { changeUserPass, createUser, removeUser, addUserRole, removeUserRole } from './drupal/users.mjs'
+export { upsertDnsRecords, upsertAllDnsRecords, upsertAllProdDnsRecords, upsertAllTestDnsRecords, upsertAllDevDnsRecords } from './dns/index.mjs'
