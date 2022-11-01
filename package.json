@@ -6,7 +6,7 @@
   "dependencies": {
     "@google-cloud/translate": "^7.0.0",
     "aws-sdk": "^2.1189.0",
-    "bioland-config": "https://github.com/scbd/bioland-config.git",
+    "bioland-config": "https://github.com/scbd/bioland-config.git#dev-admin-themes",
     "change-case": "^4.1.2",
     "consola": "2.15.3",
     "countries-and-timezones": "^3.3.0",
