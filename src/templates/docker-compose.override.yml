@@ -54,7 +54,7 @@ services:
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.service={{../name}}-svc
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.priority={{../routePriority}}
 
-      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.regex=https://^http://{{code}}.test.chm-cbd.net/(.*)
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.regex=https://{{code}}.test.chm-cbd.net/(.*)
       - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.replacement=https://{{code}}.chm-cbd.net$${1}
       - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.permanent=true
 
@@ -75,7 +75,7 @@ services:
     {{/unless}}
     {{#if site.redirectTo}}
       ## {{code}} => {{code}}.chm-cbd.net redirect to {{site.redirectTo}}
-      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.regex=https://^http://{{code}}.chm-cbd.net/(.*)
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.regex=https://{{code}}.chm-cbd.net/(.*)
       - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.replacement=https://{{site.redirectTo}}$${1}
       - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.permanent=true
 
@@ -97,7 +97,7 @@ services:
       {{/unless}}
       {{#if site.redirectTo}}
       ## {{code}} => {{url}} redirect to {{site.redirectTo}}
-      - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.regex=https://^http://{{url}}/(.*)
+      - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.regex=https://{{url}}/(.*)
       - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.replacement=https://{{site.redirectTo}}$${1}
       - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.permanent=true
 
