@@ -130,12 +130,10 @@ function cleanLangCodes(codes){
     return cleanCodes
 }
 
-export async function getDrupalCountryId(dbName){
+export async function getDrupalCountryId(dbName, countryCode){
     await getPool(dbName)
     const db  = await getConnection(dbName)
-    const   countryName        =  await getCountryNameByCode(dbName)
-
-    consola.warn(countryName)
+    const   countryName = await getCountryNameByCode(countryCode || dbName)
     
     const mappedUuid = drupalTaxonomyCountryNameMap(countryName)
 

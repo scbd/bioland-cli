@@ -1,7 +1,7 @@
 import changeCase from 'change-case'
 
 
-const   generalCommands   = [ 'backUp', 'cache', 'reload', 'custom', 'initTestSite' ] //'createBranch',
+const   generalCommands   = [ 'backUp', 'cache', 'reload', 'custom', 'initTestSite', 'dataSync' ] //'createBranch',
 const   biolandCommands   = [ ]
 const   commands          = [ ...generalCommands, ...biolandCommands ]
 const   branches          = [ 'bioland', 'prod', 'test', 'demo' ]
@@ -16,6 +16,14 @@ export const getAllUserArgs = () => {
   return { command, commandParamCase, branch, commandArgs } 
 }
 
+export const isDev = () => {
+  const args = getArgs()
+
+  if(args.includes('-d')) return true
+  if(args.includes('--dev')) return true
+
+  return false
+}
 export function getCommand({ paramCase } = { paramCase:false }){
 
   const hasTraceWarningsArg = process.argv.includes('--trace-warnings')

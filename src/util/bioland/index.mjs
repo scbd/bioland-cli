@@ -168,7 +168,7 @@ export async function biolandFooterLabel(countryCode){
         const name  = (await  getCountryNameByCode(countryCode, l || 'en')) || await translate((await  getCountryNameByCode(countryCode)), locale)
         
         configObj.settings.label = name
-        consola.warn(configObj)
+
         if(exists) await setConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, l)
         if(!exists) await createConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, l)
 

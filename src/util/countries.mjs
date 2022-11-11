@@ -25,7 +25,7 @@ export const getCountryNameByCode = async(code, locale = 'en') => {
   const countriesData = await getCountries()
   const country       = countriesData[code.toLowerCase()]
 
-  if(!country) throw new Error(`getCountryName: country not found code = ${code}`)
+  if(!country) return false
 
   return country.name[locale.toLowerCase()]
 }
