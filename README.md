@@ -6,9 +6,9 @@ const   generalCommands   = [ 'backUp', 'cache',  'reload',  'custom', 'initTest
 yarn bcli backUp // backs up all sites
 yarn bcli backUp be // backs up belgium
 
-reload - updates ddev, drush and reverse proxy with new sites from the config
+yarn bcli reload - updates ddev, drush and reverse proxy with new sites from the config
 
-yarn bcli initTestSite ht // makes changes as per checklist
+yarn bcli initTestSite ht // makes changes as per checklist 
 
 yarn bcli custom ./scripts/bcli/my-custom-script.mjs
 
@@ -43,3 +43,23 @@ async function fixPagesDemo(site, Util){
 
     consola.info(`${site}: articles deleted`)
 }
+
+initTestSite
+
+1. ad site to config https://github.com/scbd/bioland-config.git, dev should be dev env https://github.com/scbd/bioland-config.git#dev and push
+2. ssh into server
+3. cd bioland && yarn clean-install - (pulls latest config)
+4. yarn bcli reload - updates drupal/ddev/reverse proxy with folder and config files
+5. ddev restart (load new configs)
+6. cp -R /home/ubuntu/bioland/web/sites/seed/files to /home/ubuntu/bioland/web/sites/${newSiteCode}/files
+7. ddev drush @seed sql:dump --structure-tables-list=cache,cache_*,watchdog --gzip --result-file="seed.sql"
+8. mv /home/ubuntu/bioland/web/seed.sql.gz /home/ubuntu/efs/temp/seed.sql.gz
+9. gunzip /home/ubuntu/efs/temp/seed.sql.gz
+10. ddev drush @${newSiteCode} sql:cli <  /home/ubuntu/efs/temp/seed.sql
+11. rm /home/ubuntu/efs/temp/seed.sql
+12. yarn bcli initTestSite ${newSiteCode}
+13. manual login to aws route 53 add site domain point to cdn.bioland.infra.cbd.int
+14. if custom url, have client cname the domain  to ${code}.bioland.infra.cbd.int and  point ${code}.bioland.infra.cbd.int to cdn.bioland.infra.cbd.int
+15. ddev drush @${newSiteCode} cr
+16. login, manually add remove languages
+17. manually add GA code
