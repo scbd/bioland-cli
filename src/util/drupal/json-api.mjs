@@ -109,7 +109,6 @@ export async function enableJsonApi(site){
 
   spawnSync('ddev', [ 'drush', '-y', `@${site}`, 'en', 'jsonapi' ])
 
-  execSync(`ddev drush @${site} cr`)
 }
 
 
