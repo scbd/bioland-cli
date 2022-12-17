@@ -23,6 +23,8 @@ async function backUpAll(h){
 }
 
 function getTimeParams(branch='bioland'){
+  const isDev = Object.values(arguments).includes('-d')
+
   const   now               = new Date()
   const   year              = now.getFullYear()
   const   month             = ('0' + (now.getMonth() + 1)).slice(-2)
@@ -31,7 +33,7 @@ function getTimeParams(branch='bioland'){
   const   min               = now.getMinutes()
   const   seconds           = now.getSeconds()
   const   dateTime          = `${year}-${month}-${day}-T-${hour}-${min}-${seconds}`
-  const   S3_URL            = `s3://biolands/${branch}`
+  const   S3_URL            = `s3://biolands/${isDev? `bioland.cbddev.xyz` : branch }`
   const   S3_URL_YEAR_MONTH = `${S3_URL}/${year}-${month}`
 
   return { S3_URL, S3_URL_YEAR_MONTH, dateTime }
@@ -39,7 +41,10 @@ function getTimeParams(branch='bioland'){
 
 export function backUpSite(site, { preDrupalUpgrade } = { preDrupalUpgrade: false }){
   const { S3_URL , S3_URL_YEAR_MONTH, dateTime } = getTimeParams()
+  const   isDev = Object.values(arguments).includes('-d')
   
+
+
   exec(`cpulimit -P /usr/lib/tar -l 30`)
 
   execSync(`cd ${webCtx}`)
@@ -68,11 +73,13 @@ export function backUpSite(site, { preDrupalUpgrade } = { preDrupalUpgrade: fals
   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}-files${preDrupalUpgradeFlag}.tgz" "s3://biolands/latest/${site}-latest-files${preDrupalUpgradeFlag}.tgz"`)
   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}${preDrupalUpgradeFlag}.sql.gz" "s3://biolands/latest/${site}-latest${preDrupalUpgradeFlag}.sql.gz"`)
 ///home/ubuntu/efs/bk-latest
+  if(isDev) execSync(`mkdir -p /home/ubuntu/efs/bk-latest/cbddev.xyz`)
+  if(!isDev) execSync(`mkdir -p /home/ubuntu/efs/bk-latest`)
 
-  execSync(`mkdir -p /home/ubuntu/efs/bk-latest`)
-  
-  execSync(`mv "${webCtx}/dumps/${site}/${site}-${dateTime}-files${preDrupalUpgradeFlag}.tgz" "/home/ubuntu/efs/bk-latest/${site}-latest-files${preDrupalUpgradeFlag}.tgz"`)
-  execSync(`mv "${webCtx}/dumps/${site}/${site}-${dateTime}${preDrupalUpgradeFlag}.sql.gz" "/home/ubuntu/efs/bk-latest/${site}-latest${preDrupalUpgradeFlag}.sql.gz"`)
+  const efsPath = isDev? '/home/ubuntu/efs/bk-latest/cbddev.xyz/': '/home/ubuntu/efs/bk-latest/'
+
+  execSync(`mv "${webCtx}/dumps/${site}/${site}-${dateTime}-files${preDrupalUpgradeFlag}.tgz" "${efsPath}${site}-latest-files${preDrupalUpgradeFlag}.tgz"`)
+  execSync(`mv "${webCtx}/dumps/${site}/${site}-${dateTime}${preDrupalUpgradeFlag}.sql.gz" "${efsPath}${site}-latest${preDrupalUpgradeFlag}.sql.gz"`)
 
   consola.success(`${site}: transfed to s3://biolands/latest/${site}-latest-`)
 
@@ -81,34 +88,3 @@ export function backUpSite(site, { preDrupalUpgrade } = { preDrupalUpgrade: fals
 
   consola.info(`${site}: backup files removed`)
 }
-
-// function backUpPathAlias(site, { preDrupalUpgrade } = { preDrupalUpgrade: false }){
-//   const { S3_URL, S3_URL_YEAR_MONTH, dateTime } = getTimeParams( )
-//   // const { isLocal                     } = config        [branch]
-
-//   execSync(`cd ${webCtx}`)
-//   //const taxons = `taxonomy_term_data,taxonomy_term_field_data,taxonomy_term__field_cbd_country_group,taxonomy_term__field_cbd_id,taxonomy_term__field_country_cbd_guid,taxonomy_term__field_date,taxonomy_term__field_gef_id,taxonomy_term__field_image,taxonomy_term__field_image_url,taxonomy_term__field_index,taxonomy_term__field_iso3l_code,taxonomy_term__field_iso_code,taxonomy_term__field_is_un_country,taxonomy_term__field_machine_name,taxonomy_term__field_official_name,taxonomy_term__field_planning_item_type,taxonomy_term__field_protected_planet_id,taxonomy_term__field_un_number,taxonomy_term__field_un_official_short_name,taxonomy_term__field_un_region,taxonomy_term__field_url,taxonomy_term__field_www_id, taxonomy_term__parent`
-  
-//   execSync(`mkdir -p ${webCtx}/dumps/${site}`)
-
-//   const preDUpgradeFlag = preDrupalUpgrade? '-drupal-upgrade' : ''
-
-//   execSync(`ddev drush @${site} sql:dump --tables-list=path_* --gzip --result-file="dumps/${site}/${site}-${dateTime}-path-alias${preDUpgradeFlag}.sql"`)
-//   execSync(`ddev drush @${site} sql:dump --tables-list=taxonomy_* --gzip --result-file="dumps/${site}/${site}-${dateTime}-taxon${preDUpgradeFlag}.sql"`)
-//   execSync(`ddev drush @${site} sql:dump --tables-list=entity_subqueu* --gzip --result-file="dumps/${site}/${site}-${dateTime}-subqueue${preDUpgradeFlag}.sql"`)
-
-//   // if(isLocal) return
-
-//   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}-path-alias${preDUpgradeFlag}.sql.gz" "${S3_URL_YEAR_MONTH}/${site}/${site}-${dateTime}-path-alias${preDUpgradeFlag}.sql.gz"`)
-//   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}-taxon${preDUpgradeFlag}.sql.gz" "${S3_URL_YEAR_MONTH}/${site}/${site}-${dateTime}-taxon${preDUpgradeFlag}.sql.gz"`)
-//   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}-subqueue${preDUpgradeFlag}.sql.gz" "${S3_URL_YEAR_MONTH}/${site}/${site}-${dateTime}-subqueue${preDUpgradeFlag}.sql.gz"`)
-
-//   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}-path-alias${preDUpgradeFlag}.sql.gz" "${S3_URL}/${site}-latest-path-alias${preDUpgradeFlag}.sql.gz"`)
-//   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}-taxon${preDUpgradeFlag}.sql.gz" "${S3_URL}/${site}-latest-taxon${preDUpgradeFlag}.sql.gz"`)
-//   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}-subqueue${preDUpgradeFlag}.sql.gz" "${S3_URL}/${site}-latest-subqueue${preDUpgradeFlag}.sql.gz"`)
-
-//   execSync(`rm ${webCtx}/dumps/${site}/${site}-${dateTime}-path-alias${preDUpgradeFlag}.sql.gz`)
-//   execSync(`rm ${webCtx}/dumps/${site}/${site}-${dateTime}-taxon${preDUpgradeFlag}.sql.gz`)
-//   execSync(`rm ${webCtx}/dumps/${site}/${site}-${dateTime}-subqueue${preDUpgradeFlag}.sql.gz`)
-// }
-
