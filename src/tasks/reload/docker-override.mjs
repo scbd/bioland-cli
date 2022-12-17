@@ -1,10 +1,15 @@
 import   Handlebars                from 'handlebars'
+import justHandlebarsHelpers from 'just-handlebars-helpers'
 import   config                    from '../../util/config.mjs'
 import { readTemplate, writeFile } from '../../util/files.mjs'
 import { ddev         }            from '../../util/context.mjs'
 import { execSync     }            from 'child_process'
 
 const HB = Handlebars.create()
+
+justHandlebarsHelpers.registerHelpers(HB);
+
+
 
 export const initDockerOverride = function (){
   const isDev    = Object.values(arguments).includes('-d')
