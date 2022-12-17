@@ -3,20 +3,23 @@
   "version": "1.0.0",
   "main": "src/index.mjs",
   "license": "MIT",
+  "scripts": {
+    "clean-install": "if test -f yarn.lock; then rm yarn.lock; fi && if test -f node_modules; then rm -rf node_modules; fi && yarn install --force"
+  },
   "dependencies": {
-    "@google-cloud/translate": "^7.0.0",
-    "aws-sdk": "^2.1189.0",
+    "@google-cloud/translate": "7.0.4",
+    "aws-sdk": "2.1277.0",
     "bioland-config": "https://github.com/scbd/bioland-config.git#dev",
-    "change-case": "^4.1.2",
+    "change-case": "4.1.2",
     "consola": "2.15.3",
-    "countries-and-timezones": "^3.3.0",
-    "fs-extra": "^10.1.0",
-    "handlebars": "^4.7.7",
-    "lodash.isplainobject": "^4.0.6",
-    "mariadb": "^3.0.1",
+    "countries-and-timezones": "3.4.0",
+    "fs-extra": "11.1.0",
+    "handlebars": "4.7.7",
+    "lodash.isplainobject": "4.0.6",
+    "mariadb": "3.0.2",
     "ora": "6.1.2",
-    "php-serialize": "^4.0.2",
-    "superagent": "^8.0.0"
+    "php-serialize": "4.0.2",
+    "superagent": "8.0.6"
   },
   "bin": {
     "bioland-cli": "bin/bioland-cli.mjs",
