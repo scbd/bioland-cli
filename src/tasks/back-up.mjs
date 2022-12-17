@@ -42,8 +42,6 @@ function getTimeParams(branch='bioland'){
 export function backUpSite(site, { preDrupalUpgrade } = { preDrupalUpgrade: false }){
   const { S3_URL , S3_URL_YEAR_MONTH, dateTime } = getTimeParams()
   const   isDev = Object.values(arguments).includes('-d')
-  
-
 
   exec(`cpulimit -P /usr/lib/tar -l 30`)
 
@@ -72,7 +70,7 @@ export function backUpSite(site, { preDrupalUpgrade } = { preDrupalUpgrade: fals
 
   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}-files${preDrupalUpgradeFlag}.tgz" "s3://biolands/latest/${site}-latest-files${preDrupalUpgradeFlag}.tgz"`)
   execSync(`aws s3 cp "${webCtx}/dumps/${site}/${site}-${dateTime}${preDrupalUpgradeFlag}.sql.gz" "s3://biolands/latest/${site}-latest${preDrupalUpgradeFlag}.sql.gz"`)
-///home/ubuntu/efs/bk-latest
+
   if(isDev) execSync(`mkdir -p /home/ubuntu/efs/bk-latest/cbddev.xyz`)
   if(!isDev) execSync(`mkdir -p /home/ubuntu/efs/bk-latest`)
 
