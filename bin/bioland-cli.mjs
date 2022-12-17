@@ -5,7 +5,6 @@ import { resolve } from 'path'
 import { startFeedback , endFeedback, startTaskInfo, endTaskInfo, taskError } from '../src/util/cli-feedback.mjs'
 import { config, context, getCommand , getBranch                            } from '../src/util/index.mjs'
 
-import consola from 'consola'
 
 const src  = resolve(context, 'node_modules/bioland-cli/src/')
 
