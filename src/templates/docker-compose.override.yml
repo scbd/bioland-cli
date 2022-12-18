@@ -38,21 +38,25 @@ services:
       ## HTTP Routers router.name = b-${branchName}-${subDomain}-${countryCode} // uniqure router definition via name
 
   {{#each sites as |site code|}}
-    {{#if site.redirectTo}}
+
+    
+      {{#unless site.environment}}
+      {{#if site.redirectTo}}
       ## {{code}} => main url {{site.redirectTo}}
       - traefik.http.routers.b-{{../name}}-{{code}}-redirect-base-rtr.entrypoints=https
       - traefik.http.routers.b-{{../name}}-{{code}}-redirect-base-rtr.rule=Host(`{{site.redirectTo}}`)
       - traefik.http.routers.b-{{../name}}-{{code}}-redirect-base-rtr.service={{../name}}-svc
       - traefik.http.routers.b-{{../name}}-{{code}}-redirect-base-rtr.priority={{../routePriority}}
 
-    {{/if}}
-    {{#unless site.redirectTo}}
-      {{#unless site.environment}}
+      {{/if}}
+      {{#unless site.redirectTo}}
       ## {{code}} => {{code}}.chm-cbd.net
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.entrypoints=https
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.rule=Host(`{{code}}.chm-cbd.net`)
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.service={{../name}}-svc
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.priority={{../routePriority}}
+
+      {{/unless}}
 
       - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.regex=https://{{code}}.test.chm-cbd.net/(.*)
       - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.replacement=https://{{code}}.chm-cbd.net$${1}
@@ -72,9 +76,11 @@ services:
       - traefik.http.routers.b-{{../name}}-{{code}}-t-rtr.priority={{../routePriority}}
 
       {{/if}}
-    {{/unless}}
+    
     {{#if site.redirectTo}}
-      ## {{code}} => {{code}}.chm-cbd.net redirect to {{site.redirectTo}}
+    {{#if (neq site.redirectTo (concat code '.chm-cbd.net'))}}
+      ## ffff
+      ## {{code}} => {{code}}.chm-cbd.net redirect to {{site.redirectTo}} {{url}}
       - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.regex=https://{{code}}.chm-cbd.net/(.*)
       - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.replacement=https://{{site.redirectTo}}$${1}
       - traefik.http.middlewares.b-{{../name}}-{{code}}-mw.redirectregex.permanent=true
@@ -84,6 +90,8 @@ services:
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.service={{../name}}-svc
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.priority=0
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.middlewares=b-{{../name}}-{{code}}-mw
+      ##
+    {{/if}}
     {{/if}}
 
     {{#each site.urls as |url index|}}
@@ -96,6 +104,7 @@ services:
 
       {{/unless}}
       {{#if site.redirectTo}}
+
       ## {{code}} => {{url}} redirect to {{site.redirectTo}}
       - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.regex=https://{{url}}/(.*)
       - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.replacement=https://{{site.redirectTo}}$${1}
