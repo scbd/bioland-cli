@@ -6,40 +6,10 @@ services:
       ## HTTP Services
       - traefik.http.services.{{name}}-svc.loadbalancer.server.port=80
 
-      ## Manual Redirects
-      - traefik.http.middlewares.www8.redirectregex.regex=^https://www8.chm-cbd.net/(.*)
-      - traefik.http.middlewares.www8.redirectregex.replacement=https://www.chm-cbd.net/$${1}
-      - traefik.http.middlewares.www8.redirectregex.permanent=true
-
-      - traefik.http.routers.b-prod-www-10-rtr.entrypoints=https
-      - traefik.http.routers.b-prod-www-10-rtr.rule=Host(`www8.chm-cbd.net`)
-      - traefik.http.routers.b-prod-www-10-rtr.service=bioland-svc
-      - traefik.http.routers.b-prod-www-10-rtr.priority=2
-      - traefik.http.routers.b-prod-www-10-rtr.middlewares=www8
-
-      ## Redirects
-  # {{#if redirects}}
-  #   {{#each redirects as |rdr index|}}
-  #     {{#each rdr as |from to|}}
-  #     - traefik.http.middlewares.rdr-{{index}}.redirectregex.regex=https://{{to}}/$${1}
-  #     - traefik.http.middlewares.rdr-{{index}}.redirectregex.replacement=^https://{{from}}/(.*)
-  #     - traefik.http.middlewares.rdr-{{index}}.redirectregex.permanent=true
-
-  #     - traefik.http.routers.rdr-{{index}}-rtr.entrypoints=https
-  #     - traefik.http.routers.rdr-{{index}}-rtr.rule=Host(`{{to}}`)
-  #     - traefik.http.routers.rdr-{{index}}-rtr.service=prod-svc
-  #     - traefik.http.routers.rdr-{{index}}-rtr.priority=2
-  #     - traefik.http.routers.rdr-{{index}}-rtr.middlewares=rdr-{{index}}
-      
-  #     {{/each}}
-  #   {{/each}}
-  # {{/if}}
-
       ## HTTP Routers router.name = b-${branchName}-${subDomain}-${countryCode} // uniqure router definition via name
 
   {{#each sites as |site code|}}
 
-    
       {{#unless site.environment}}
       {{#if site.redirectTo}}
       ## {{code}} => main url {{site.redirectTo}}
