@@ -29,7 +29,7 @@ services:
       {{/unless}}
 
       - traefik.http.middlewares.b-{{../name}}-{{code}}-test-mw.redirectregex.regex=https://{{code}}.test.chm-cbd.net/(.*)
-      - traefik.http.middlewares.b-{{../name}}-{{code}}-test-mw.redirectregex.replacement=https://{{code}}.chm-cbd.net$${1}
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-test-mw.redirectregex.replacement=https://{{code}}.chm-cbd.net/$${1}
       - traefik.http.middlewares.b-{{../name}}-{{code}}-test-mw.redirectregex.permanent=true
 
       - traefik.http.routers.b-{{../name}}-{{code}}-test-rtr.entrypoints=https
@@ -49,10 +49,9 @@ services:
     
     {{#if site.redirectTo}}
     {{#if (neq site.redirectTo (concat code '.chm-cbd.net'))}}
-      ## ffff
       ## {{code}} => {{code}}.chm-cbd.net redirect to {{site.redirectTo}} {{url}}
       - traefik.http.middlewares.b-{{../name}}-{{code}}-rdt-mw.redirectregex.regex=https://{{code}}.chm-cbd.net/(.*)
-      - traefik.http.middlewares.b-{{../name}}-{{code}}-rdt-mw.redirectregex.replacement=https://{{site.redirectTo}}$${1}
+      - traefik.http.middlewares.b-{{../name}}-{{code}}-rdt-mw.redirectregex.replacement=https://{{site.redirectTo}}/$${1}
       - traefik.http.middlewares.b-{{../name}}-{{code}}-rdt-mw.redirectregex.permanent=true
 
       - traefik.http.routers.b-{{../name}}-{{code}}-rtr.entrypoints=https
@@ -77,7 +76,7 @@ services:
 
       ## {{code}} => {{url}} redirect to {{site.redirectTo}}
       - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.regex=https://{{url}}/(.*)
-      - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.replacement=https://{{site.redirectTo}}$${1}
+      - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.replacement=https://{{site.redirectTo}}/$${1}
       - traefik.http.middlewares.b-{{../../name}}-{{code}}-{{index}}-mw.redirectregex.permanent=true
 
       - traefik.http.routers.b-{{../../name}}-{{code}}-{{index}}-rtr.entrypoints=https
@@ -94,14 +93,6 @@ services:
     networks:
       - webgateway
       - ddev_default
-{{#unless isLocal}}
-  db:
-    deploy:
-      resources:
-          limits:
-            cpus: "0.50"
-            memory: 1536M
-{{/unless}}
 networks:
   webgateway:
     external: true
