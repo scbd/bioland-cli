@@ -28,5 +28,8 @@ export default async (branch, commandArgs, { Util }) => {
             await  Util.dbSet(countryCode, `Update taxonomy_term_revision__field_image_url SET  field_image_url_uri = ? WHERE entity_id = ${entity_id} AND bundle = '${bundle}' `, [(field_image_url_uri.replace('http://www8', 'https://www')).replace('http://', 'https://')])
 
         remaining--;
+
+        await Util.endPool(countryCode)
+        await Util.sleep(1000)
     }
 }

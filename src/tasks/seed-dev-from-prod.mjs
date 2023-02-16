@@ -1,10 +1,11 @@
-import { notifyDone        , runTask } from '../util/cli-feedback.mjs'
-import { initDdevConfig              } from './reload/ddev-config.mjs'
-import { initDrushConfig             } from './reload/drush-config.mjs'
-import { initSites                   } from './reload/sites.mjs'
-import { initDockerOverride          } from './reload/docker-override.mjs'
-import { ensureDev, isDev     }            from '../util/dev.mjs'
-import { execSync } from 'child_process'
+import { notifyDone            , runTask } from '../util/cli-feedback.mjs'
+import { initDdevConfig                  } from './reload/ddev-config.mjs'
+import { initDrushConfig                 } from './reload/drush-config.mjs'
+import { initSites                       } from './reload/sites.mjs'
+import { initDockerOverride              } from './reload/docker-override.mjs'
+import { ensureDev            , isDev    } from '../util/dev.mjs'
+import { upsertAllDevDnsRecords          } from '../util/dns/index.mjs'
+import { execSync                        } from 'child_process'
 import   config                    from '../util/config.mjs'
 import consola from 'consola'
 
@@ -42,7 +43,7 @@ async function seed (branch, commandArgs) {
 
   consola.info(`Updating route 53 DNS on all test sites`)
 
-  await upsertAllDevDnsRecord()
+  await upsertAllDevDnsRecords()
 
   consola.info(`DNS updated on all dev sites: `, sites.length)
 }
