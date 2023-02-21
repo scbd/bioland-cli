@@ -134,18 +134,14 @@ export async function getDrupalCountryId(dbName){
     await getPool(dbName)
     const db  = await getConnection(dbName)
     const   countryName        =  await getCountryNameByCode(dbName)
-
-    consola.warn(countryName)
     
     const mappedUuid = drupalTaxonomyCountryNameMap(countryName)
 
     if(mappedUuid) return mappedUuid
-    // create the connection
 
-    const query = ' SELECT `uuid` FROM `taxonomy_term_field_data` JOIN `taxonomy_term_data` ON taxonomy_term_field_data.tid = taxonomy_term_data.tid WHERE `name` = ? ;'
-  
+    const query = ' SELECT `uuid` FROM `taxonomy_term__field_iso_code` JOIN `taxonomy_term_data` ON taxonomy_term__field_iso_code.entity_id = taxonomy_term_data.tid WHERE `field_iso_code_value` = ? ;'
 
-    const rows  = await db.execute(query, [countryName]);
+    const rows     = await db.execute(query, [dbName.toUpperCase()]);
     const { uuid } = rows[0]
 
     await releaseConnection(dbName)
