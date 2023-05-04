@@ -10,7 +10,7 @@ export { readTemplate , readFile     , writeFile  , writeDdevFile , replaceInFil
 export { getCountries, getIsoAlpha3, getCountryNameByCode  } from './countries.mjs'
 export { config } from './config.mjs'
 export { translate, translateCountryName  } from './i18n/index.mjs'
-export { getSiteLocales, dbGet, dbSet, endPool, getPool } from './drupal/db.mjs'
+export { getSiteLocales, dbGet, dbSet, endPool, getPool, getConnection } from './drupal/db.mjs'
 export { patchMenuUri, login, deleteMenu, enableJsonApi, patch, deleteNode, post, get} from './drupal/json-api.mjs'
 export { setConfigObject, getConfigObject, createConfigObject, getDefaultLocale, enableJsonApiConfig } from './drupal/drupal-config.mjs'
 export { forEachSite, forEachTestSite, forEachProductionSite, forEachPtkMigratedSite } from './for-each-site.mjs'

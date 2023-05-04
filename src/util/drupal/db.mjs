@@ -100,12 +100,17 @@ export async function getSiteLocales(dbName){
         const response = await db.query('SELECT language  FROM locales_target')
 
         response.push({ language: 'en' })
-    
-        return unique(response.map( ({ language }) => language))
+        
+ 
+        return unique(response.map( ({ language }) => language )).map((language) => {
+            if(language === 'zh-hans') return 'zh'
+
+            return language
+        })
     }catch(e){
         consola.error(e)
     } finally {
-	    await releaseConnection(dbName)
+        await releaseConnection(dbName)
     }
 }
 

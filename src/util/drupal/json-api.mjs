@@ -1,6 +1,6 @@
 import { spawnSync, execSync } from 'child_process'
 
-
+import { isDev } from '../dev.mjs'
 import SA      from 'superagent'
 import config  from '../config.mjs'
 import consola from 'consola'
@@ -38,9 +38,8 @@ export async function login (site){
 
 export async function patch(site, path, id, data,locale='' ){
   try{
-    const host    = getHost(site)
+    const host  = getHost(site)
 
-    
     return $http.patch(`${host}${locale? '/'+locale : ''}/jsonapi/${path}/${id}`)
                     .set('Content-Type', 'application/vnd.api+json')
                     .send(JSON.stringify(data))
@@ -52,7 +51,6 @@ export async function post(site, path, data,locale='' ){
   try{
     const host    = getHost(site)
 
-    
     return $http.post(`${host}${locale? '/'+locale : ''}/jsonapi/${path}`)
                     .set('Content-Type', 'application/vnd.api+json')
                     .send(JSON.stringify(data))
@@ -78,7 +76,7 @@ export async function patchMenuUri(site, id, uri, locale=''){
   try{
     const host    = getHost(site)
     const data    = { data: { type: "menu_link_content--menu_link_content", id, attributes: { link: { uri  } } } }
-    
+
     return $http.patch(`${host}${locale? '/'+locale : ''}/jsonapi/menu_link_content/menu_link_content/${id}`)
                     .set('Content-Type', 'application/vnd.api+json')
                     .send(JSON.stringify(data))
@@ -113,6 +111,8 @@ export async function enableJsonApi(site){
 
 
 function getHost(site){
+  if(isDev()) return `https://${site}.bioland.cbddev.xyz`
+
   const { sites                   } =       config
   const { redirectTo, environment } = sites[site]
 

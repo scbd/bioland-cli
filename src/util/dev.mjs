@@ -16,4 +16,4 @@ export const ensureDev = async () => {
     process.exit(-1)
 }
 
-export const isDev = function (args) { return Object.values(args).includes('-d') }
+export const isDev = function () { return process.argv.includes('-d') }
