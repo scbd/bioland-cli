@@ -9,6 +9,8 @@ import countryTimeZone from 'countries-and-timezones'
 import { execSync  }          from 'child_process'
 import { patchMenuUri, login } from '../drupal/json-api.mjs'
 import footerLinks from './footer-menu-content.mjs'
+import { backUpSite } from '../../tasks/back-up.mjs'
+import { isDev } from '../dev.mjs'
 //eu_cookie_compliance.settings
 //gbifstats.settings
 //geolocation.settings
@@ -19,6 +21,15 @@ import footerLinks from './footer-menu-content.mjs'
 //system.menu.main
 
 export async function initNewTestSite(country){
+    const seedSqlPathZipped = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql.gz` : `/home/ubuntu/efs/bk-latest/seed-latest.sql.gz`
+    const seedSqlPath       = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql` : `/home/ubuntu/efs/bk-latest/seed-latest.sql`
+    const seedFilesPath      = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest-files.tgz` : `/home/ubuntu/efs/bk-latest/seed-latest-files.tgz`
+
+    await backUpSite('seed')
+    execSync(`gunzip  ${seedSqlPathZipped} -f`)
+    execSync(`ddev drush @${country} sql:cli < ${seedSqlPath}`)
+    execSync(`mkdir -p /home/ubuntu/bioland/web/sites/${country}/files`)
+    execSync(`tar -xvf  ${seedFilesPath} -C /home/ubuntu/bioland/web/sites/${country}/files`)
     await setDefaultCountry(country)
     await setGbifStats(country)
     await setRegionalSettings(country)
@@ -168,7 +179,7 @@ export async function biolandFooterLabel(countryCode){
         const name  = (await  getCountryNameByCode(countryCode, l || 'en')) || await translate((await  getCountryNameByCode(countryCode)), locale)
         
         configObj.settings.label = name
-        consola.warn(configObj)
+
         if(exists) await setConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, l)
         if(!exists) await createConfigObject(countryCode,'block.block.biolandfooterbiolandlinks', configObj, l)
 

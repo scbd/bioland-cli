@@ -9,6 +9,9 @@ const $http  = SA.agent()
 const global = {  }
 
 const { BL_API_USER_PASS, BL_API_USER } = process.env
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
+export const jsonApiLogin = login 
 
 export async function login (site){
   try{
@@ -72,6 +75,50 @@ export async function get(site, path, id, locale='' ){
   }
 }
 
+export async function jsonApiGet(site, { path , id, query, locale = '' } ){
+  try{
+    const host         = getHost(site)
+    const localePrefix = locale? '/'+locale : ''
+    const idOrQuery    = id? `/${id}` : query? `?${query}` : ''
+   
+    return $http.get(`${host}${localePrefix}/jsonapi/${path}${idOrQuery}`)
+                    .set('Content-Type', 'application/vnd.api+json')
+
+  }catch(e){
+    consola.error(e)
+  }
+}
+
+export async function jsonApiDelete(site, { path, id, locale = '' }){
+  try{
+    const host            = getHost(site)
+    const localePrefix    = locale? '/'+locale : ''
+    const identifiers     = Array.isArray(id)? id : [id]
+    const requestPromises = []
+
+    for (const identifier of identifiers) {
+      const req = $http.delete(`${host}${localePrefix}/jsonapi/${path}/${id}`)
+                    .set('Content-Type', 'application/vnd.api+json')
+
+      requestPromises.push(req)
+      await sleep(500)
+    }
+    return Promise.all(requestPromises)
+  }catch(e){ consola.error('error')}
+}
+
+export async function jsonApiPost(site, { path, data, locale = '' }){
+  try{
+    const host = getHost(site)
+
+    return $http.post(`${host}${locale? '/'+locale : ''}/jsonapi/${path}`)
+                    .set('Content-Type', 'application/vnd.api+json')
+                    .send(JSON.stringify({data}))
+  }catch(e){
+    consola.error(e)
+  }
+}
+
 export async function patchMenuUri(site, id, uri, locale=''){
   try{
     const host    = getHost(site)
@@ -118,7 +165,7 @@ function getHost(site){
 
   if(redirectTo) return redirectTo
 
-  if(environment) return `${site}.test.chm-cbd.net`
+  if(environment) return `https://${site}.test.chm-cbd.net`
 
-  return `${site}.chm-cbd.net`
+  return `https://${site}.chm-cbd.net`
 }

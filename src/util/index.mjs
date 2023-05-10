@@ -3,7 +3,7 @@ export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 export { runTask, startFeedback, runTaskAndNotify, notifyDone, notifyStartTask, notifyEndTask, startTaskInfo, taskError, endTaskInfo, endFeedback } from './cli-feedback.mjs'
 
 export { context      , drushSites   , ddev       , sitesCtx      , webCtx        } from './context.mjs'
-export { getCommand   , getBranch    , getArgs    , getAllUserArgs                } from './commands.mjs'
+export { getCommand   , getBranch    , getArgs    , getAllUserArgs            } from './commands.mjs'
 export { readTemplate , readFile     , writeFile  , writeDdevFile , replaceInFile, importJsFile } from './files.mjs'
 
 
@@ -18,3 +18,4 @@ export { initNewTestSite, setTitleAndSlogan, setLogo, biolandFooterLabel, setReg
 export { changeUserPass, createUser, removeUser, addUserRole, removeUserRole } from './drupal/users.mjs'
 export { upsertDnsRecords, upsertAllDnsRecords, upsertAllProdDnsRecords, upsertAllTestDnsRecords, upsertAllDevDnsRecords } from './dns/index.mjs'
 export { ensureDev, isDev } from  './dev.mjs'
+export { syncNbsaps, syncNationalReports, syncNationalTargets } from './bioland/migrations/index.mjs'

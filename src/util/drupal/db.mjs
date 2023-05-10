@@ -135,10 +135,10 @@ function cleanLangCodes(codes){
     return cleanCodes
 }
 
-export async function getDrupalCountryId(dbName){
+export async function getDrupalCountryId(dbName, countryCode){
     await getPool(dbName)
     const db  = await getConnection(dbName)
-    const   countryName        =  await getCountryNameByCode(dbName)
+    const   countryName        =  await getCountryNameByCode(countryCode || dbName)
     
     const mappedUuid = drupalTaxonomyCountryNameMap(countryName)
 
@@ -146,7 +146,7 @@ export async function getDrupalCountryId(dbName){
 
     const query = ' SELECT `uuid` FROM `taxonomy_term__field_iso_code` JOIN `taxonomy_term_data` ON taxonomy_term__field_iso_code.entity_id = taxonomy_term_data.tid WHERE `field_iso_code_value` = ? ;'
 
-    const rows     = await db.execute(query, [dbName.toUpperCase()]);
+    const rows     = await db.execute(query, [countryCode.toUpperCase()]);
     const { uuid } = rows[0]
 
     await releaseConnection(dbName)
