@@ -44,7 +44,7 @@ export function setFooterLinks(countryCode){
 }
 
 export async function setDefaultCountry(countryCode){
-    const uuid = await getDrupalCountryId(countryCode)
+    const uuid = await getDrupalCountryId(countryCode, countryCode)
 
     const configKeys = [ 
                             'field.field.node.news.field_countries',
