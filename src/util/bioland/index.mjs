@@ -11,6 +11,7 @@ import { patchMenuUri, login } from '../drupal/json-api.mjs'
 import footerLinks from './footer-menu-content.mjs'
 import { backUpSite } from '../../tasks/back-up.mjs'
 import { isDev } from '../dev.mjs'
+import { upsertAllTestDnsRecords          } from '../dns/index.mjs'
 //eu_cookie_compliance.settings
 //gbifstats.settings
 //geolocation.settings
@@ -21,7 +22,7 @@ import { isDev } from '../dev.mjs'
 //system.menu.main
 
 export async function initNewTestSite(country, loadSeed = true){
-
+    await upsertAllTestDnsRecords ();
     if(loadSeed){
         const seedSqlPathZipped = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql.gz` : `/home/ubuntu/efs/bk-latest/seed-latest.sql.gz`
         const seedSqlPath       = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql` : `/home/ubuntu/efs/bk-latest/seed-latest.sql`
