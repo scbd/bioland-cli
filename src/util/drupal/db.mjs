@@ -146,7 +146,8 @@ export async function getDrupalCountryId(dbName, countryCode){
 
     const query = ' SELECT `uuid` FROM `taxonomy_term__field_iso_code` JOIN `taxonomy_term_data` ON taxonomy_term__field_iso_code.entity_id = taxonomy_term_data.tid WHERE `field_iso_code_value` = ? ;'
 
-    const rows     = await db.execute(query, [countryCode.toUpperCase()]);
+    const   code   = countryCode || dbName
+    const   rows   = await db.execute(query, [code.toUpperCase()]);
     const { uuid } = rows[0]
 
     await releaseConnection(dbName)
