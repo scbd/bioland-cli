@@ -54,7 +54,7 @@ export async function getDocTemplate(doc, { countryCode, docType, lang='en' }){
     const   uri   = `https://chm.cbd.int/database/record?documentID=${doc.documentId}`
     const   alias = `/documents/${slug(doc.title.en)}`
 
-    const countryId = await getDrupalCountryId('www', countryCode)
+    const countryId = await getDrupalCountryId('seed', countryCode)
     const bodyData  = { documentId, ...(await getFileParams(doc.documentLinks)) }
     const body      = generateBody(bodyData)
 

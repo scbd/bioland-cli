@@ -5,7 +5,8 @@ import { initNewTestSite } from '../util/index.mjs'
 import   consola               from 'consola'
 
 export default async(branch, args) => {
-
+consola.error(args)
+  if(args[1]) args[1] = false
   if(args.length)
     await (runTask(branch))(init, `${branch.toUpperCase()}: Initiating test site: ${args[0]}`, args)
 

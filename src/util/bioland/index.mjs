@@ -20,16 +20,20 @@ import { isDev } from '../dev.mjs'
 //system.maintenance
 //system.menu.main
 
-export async function initNewTestSite(country){
-    const seedSqlPathZipped = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql.gz` : `/home/ubuntu/efs/bk-latest/seed-latest.sql.gz`
-    const seedSqlPath       = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql` : `/home/ubuntu/efs/bk-latest/seed-latest.sql`
-    const seedFilesPath      = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest-files.tgz` : `/home/ubuntu/efs/bk-latest/seed-latest-files.tgz`
+export async function initNewTestSite(country, loadSeed = true){
 
-    await backUpSite('seed')
-    execSync(`gunzip  ${seedSqlPathZipped} -f`)
-    execSync(`ddev drush @${country} sql:cli < ${seedSqlPath}`)
-    execSync(`mkdir -p /home/ubuntu/bioland/web/sites/${country}/files`)
-    execSync(`tar -xvf  ${seedFilesPath} -C /home/ubuntu/bioland/web/sites/${country}/files`)
+    if(loadSeed){
+        const seedSqlPathZipped = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql.gz` : `/home/ubuntu/efs/bk-latest/seed-latest.sql.gz`
+        const seedSqlPath       = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql` : `/home/ubuntu/efs/bk-latest/seed-latest.sql`
+        const seedFilesPath      = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest-files.tgz` : `/home/ubuntu/efs/bk-latest/seed-latest-files.tgz`
+
+        await backUpSite('seed')
+        execSync(`gunzip  ${seedSqlPathZipped} -f`)
+        execSync(`ddev drush @${country} sql:cli < ${seedSqlPath}`)
+        execSync(`mkdir -p /home/ubuntu/bioland/web/sites/${country}/files`)
+        execSync(`tar -xvf  ${seedFilesPath} -C /home/ubuntu/bioland/web/sites/${country}/files`)
+    }
+    
     await setDefaultCountry(country)
     await setGbifStats(country)
     await setRegionalSettings(country)
