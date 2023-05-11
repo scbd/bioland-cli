@@ -21,6 +21,7 @@ import { isDev } from '../dev.mjs'
 //system.menu.main
 
 export async function initNewTestSite(country, loadSeed = true){
+
     if(loadSeed){
         const seedSqlPathZipped = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql.gz` : `/home/ubuntu/efs/bk-latest/seed-latest.sql.gz`
         const seedSqlPath       = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql` : `/home/ubuntu/efs/bk-latest/seed-latest.sql`
@@ -78,28 +79,28 @@ export async function enableGbifStats(countryCode){
 
 export async function setGbifStats(countryCode){
 
-    const configObj   = (await getConfigObject(countryCode,'gbifstats.settings'))
+    // const configObj   = (await getConfigObject(countryCode,'gbifstats.settings'))
 
-    delete(configObj.gbifstats.node_name)
-    delete(configObj.gbifstats.head_delegation)
-    delete(configObj.gbifstats.website)
-    delete(configObj.head_delegation)
-    delete(configObj.gbifstats.node_manager)
-    delete(configObj.gbifstats.link_page_GBIF)
-    configObj.gbifstats.categories.last_dataset=0
-    configObj.gbifstats.country_code=countryCode.toUpperCase()
+    // delete(configObj.gbifstats.node_name)
+    // delete(configObj.gbifstats.head_delegation)
+    // delete(configObj.gbifstats.website)
+    // delete(configObj.head_delegation)
+    // delete(configObj.gbifstats.node_manager)
+    // delete(configObj.gbifstats.link_page_GBIF)
+    // configObj.gbifstats.categories.last_dataset=0
+    // configObj.gbifstats.country_code=countryCode.toUpperCase()
 
-    await setConfigObject(countryCode,'gbifstats.settings', configObj)
+    // await setConfigObject(countryCode,'gbifstats.settings', configObj)
 
-    execSync(`chromium-browser --headless --no-sandbox --verbose  --incognito  --ignore-certificate-errors --ignore-ssl-errors $(ddev drush @${countryCode} user:login --mail=bioland-sm@chm-cbd.net /gbifstats/generate/${countryCode.toUpperCase()})`)
+    // execSync(`chromium-browser --headless --no-sandbox --verbose  --incognito  --ignore-certificate-errors --ignore-ssl-errors $(ddev drush @${countryCode} user:login --mail=bioland-sm@chm-cbd.net /gbifstats/generate/${countryCode.toUpperCase()})`)
 
     const locale               = await getDefaultLocale(countryCode)
-    const defaultLocale        = locale === 'en'? '' : 'en'
+    const defaultLocale        = locale === 'en'? '' : locale
     const countryExists        = !!(await getCountries())[countryCode]
     const countryCodeUpperCase = countryExists? countryCode.toUpperCase() : 'FJ'
 
     await login(countryCode)
-    await patchMenuUri(countryCode, 'a2864c79-b456-43eb-90bb-15ee0fd98da3', `internal:/gbifstats/display/${countryCodeUpperCase}`, defaultLocale)
+    await patchMenuUri(countryCode, 'a2864c79-b456-43eb-90bb-15ee0fd98da3', `https://www.gbif.org/country/${countryCodeUpperCase}/summary`, defaultLocale)
 
 
     consola.info(`${countryCode} - : GBIF configured`)
