@@ -8,9 +8,10 @@ const HB = Handlebars.create()
 
 export const initDrushConfig = function (){
 
-  const isDev = Object.values(arguments).includes('-d')
+  const isDev      = Object.values(arguments).includes('-d')
+  const isRestore  = Object.values(arguments).includes('-r')
 
-  const fileName  = isDev? 'drush.site.dev.yml' : 'drush.site.yml'
+  const fileName  = isDev? 'drush.site.dev.yml' : isRestore? 'drush.site.res.yml' :'drush.site.yml'
   const template  = HB.compile(readTemplate(fileName).toString())
   const { sites } = config
 

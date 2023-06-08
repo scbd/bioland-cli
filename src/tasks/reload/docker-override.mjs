@@ -12,8 +12,9 @@ justHandlebarsHelpers.registerHelpers(HB);
 
 
 export const initDockerOverride = function (){
-  const isDev    = Object.values(arguments).includes('-d')
-  const fileName = isDev? 'docker-compose.override.dev.yml' : 'docker-compose.override.yml'
+  const isDev      = Object.values(arguments).includes('-d')
+  const isRestore  = Object.values(arguments).includes('-r')
+  const fileName   = isDev? 'docker-compose.override.dev.yml' : isRestore? 'docker-compose.override.res.yml':'docker-compose.override.yml'
 
   const template = HB.compile(readTemplate(fileName).toString())
 

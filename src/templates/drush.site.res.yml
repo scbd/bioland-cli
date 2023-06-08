@@ -1,0 +1,3 @@
+prod:
+  root: /var/www/html/web
+  uri: {{code}}.bioland-restore.cbddev.xyz

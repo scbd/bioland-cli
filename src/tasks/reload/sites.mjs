@@ -9,14 +9,15 @@ import { execSync     }            from 'child_process'
 const HB = Handlebars.create()
 
 export const initSites = function (){
-  const isDev = Object.values(arguments).includes('-d')
+  const isDev      = Object.values(arguments).includes('-d')
+  const isRestore  = Object.values(arguments).includes('-r')
 
   const { sites } = config
 
   execSync(`mkdir -p ${sitesCtx}`)
 
   createSettingsCommon()
-  writeFile(sitesCtx, `sites.php`, getSitesPhpTemplate(sites, isDev))
+  writeFile(sitesCtx, `sites.php`, getSitesPhpTemplate(sites, isDev, isRestore))
   createSitesDirectories()
 }
 
@@ -43,20 +44,21 @@ function createSitesDirectories(){
   }
 }
 
-function getSitesPhpTemplate(sites, isDev){
+function getSitesPhpTemplate(sites, isDev, isRestore){
   let templateString = ''
 
   for (const code in sites) {
-    if(!isDev) templateString += `$sites["${code}.chm-cbd.net"] = "${code}";\n`;
-    if(!isDev) templateString += `$sites["${code}.test.chm-cbd.net"] = "${code}";\n`;
+    if(!isDev && !isRestore) templateString += `$sites["${code}.chm-cbd.net"] = "${code}";\n`;
+    if(!isDev && !isRestore) templateString += `$sites["${code}.test.chm-cbd.net"] = "${code}";\n`;
 
-    if(sites[code].redirectTo && !isDev)  templateString += `$sites["${sites[code].redirectTo}"] = "${code}";\n`;
+    if(sites[code].redirectTo && !isDev && !isRestore)  templateString += `$sites["${sites[code].redirectTo}"] = "${code}";\n`;
 
-    if(sites[code].urls && !isDev)
+    if(sites[code].urls && !isDev && !isRestore)
       for (const baseUrl of sites[code].urls) 
         templateString += `$sites["${baseUrl}"] = "${code}";\n`
 
     if(isDev) templateString += `$sites["${code}.bioland.cbddev.xyz"] = "${code}";\n`;
+    if(isRestore) templateString += `$sites["${code}.bioland-restore.cbddev.xyz"] = "${code}";\n`;
 
     templateString += `\n`
   }
