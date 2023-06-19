@@ -18,9 +18,9 @@ export default async function (site, { defaultCountry = 'fj', forceCountry, dele
 
     const siteNationalTargets = await siteHasNationalTarget(site)
 
-
     //sync - delete then recreate
-    await deleteDrupalDocuments(site, chmNationalTargets, siteNationalTargets)
+    if(siteNationalTargets?.length)
+        await deleteDrupalDocuments(site, chmNationalTargets, siteNationalTargets)
 
 
     if(!chmNationalTargets) return

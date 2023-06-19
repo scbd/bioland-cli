@@ -145,7 +145,7 @@ export function generateBody({ uri, name, size }){
         }
 }
 
-async function getDeleteIdentifiers(chmDocs, biolandDocs){
+async function getDeleteIdentifiers(chmDocs=[], biolandDocs=[]){
     const chmDocIds           = chmDocs? chmDocs.map( ({ _documentId_i }) => _documentId_i) : []
     const toDeleteBiolandDocs = chmDocIds.length? biolandDocs.filter(({ attributes }) => stringIncludes(attributes?.field_url?.uri, chmDocIds )) : biolandDocs
     const toDeleteIds         =  toDeleteBiolandDocs?.length? toDeleteBiolandDocs.map(({ id })=> id) : []

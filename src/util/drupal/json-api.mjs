@@ -163,7 +163,8 @@ function getHost(site){
   const { sites                   } =       config
   const { redirectTo, environment } = sites[site]
 
-  if(redirectTo) return redirectTo
+
+  if(redirectTo) return 'https://'+redirectTo
 
   if(environment) return `https://${site}.test.chm-cbd.net`
 
