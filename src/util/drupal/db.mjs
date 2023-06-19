@@ -72,7 +72,7 @@ export const dbSet  = async (dbName, queryText, queryVars) =>{
     }
 }
 
-export const dbCreateTaxonomyFieldTable  = async (dbName, fieldName) =>{
+export const dbCreateTaxonomyFieldTable  = async (dbName, fieldName, type='varchar(512)') =>{
   
     try{
         await getPool(dbName)
@@ -86,7 +86,7 @@ export const dbCreateTaxonomyFieldTable  = async (dbName, fieldName) =>{
                         \`revision_id\` int(10) unsigned NOT NULL COMMENT 'The entity revision id this data is attached to',
                         \`langcode\` varchar(32) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL DEFAULT '' COMMENT 'The language code for this data item.',
                         \`delta\` int(10) unsigned NOT NULL COMMENT 'The sequence number for this data item, used for multi-value fields',
-                        \`field_${fieldName}_value\` varchar(255) NOT NULL,
+                        \`field_${fieldName}_value\` ${type} NOT NULL,
                         PRIMARY KEY (\`entity_id\`,\`deleted\`,\`delta\`,\`langcode\`),
                         KEY \`bundle\` (\`bundle\`),
                         KEY \`revision_id\` (\`revision_id\`)
@@ -100,7 +100,7 @@ export const dbCreateTaxonomyFieldTable  = async (dbName, fieldName) =>{
                             \`revision_id\` int(10) unsigned NOT NULL COMMENT 'The entity revision id this data is attached to',
                             \`langcode\` varchar(32) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL DEFAULT '' COMMENT 'The language code for this data item.',
                             \`delta\` int(10) unsigned NOT NULL COMMENT 'The sequence number for this data item, used for multi-value fields',
-                            \`field_${fieldName}_value\` varchar(512) NOT NULL,
+                            \`field_${fieldName}_value\` ${type} NOT NULL,
                             PRIMARY KEY (\`entity_id\`,\`revision_id\`,\`deleted\`,\`delta\`,\`langcode\`),
                             KEY \`bundle\` (\`bundle\`),
                             KEY \`revision_id\` (\`revision_id\`)
