@@ -45,7 +45,7 @@ async function sync(site ){
     console.log('')
     consola.info(`Site: ${site} -> Data syncing National Targets ...`)
 
-    await syncNationalTargets(site, {  forceCountry: 'ph', deleteOnly: false })
+    await syncNationalTargets(site, {  deleteOnly: false })  //forceCountry: 'ph', 
 
     console.log('')
     consola.success(`Site: ${site} -> Data syncing National Targets`)
