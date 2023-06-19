@@ -72,6 +72,52 @@ export const dbSet  = async (dbName, queryText, queryVars) =>{
     }
 }
 
+export const dbCreateTaxonomyFieldTable  = async (dbName, fieldName) =>{
+  
+    try{
+        await getPool(dbName)
+
+        const db  = await getConnection(dbName)
+
+        const sql = `CREATE TABLE \`taxonomy_term__field_${fieldName}\` (
+                        \`bundle\` varchar(128) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL DEFAULT '' COMMENT 'The field instance bundle to which this row belongs, used when deleting a field instance',
+                        \`deleted\` tinyint(4) NOT NULL DEFAULT 0 COMMENT 'A boolean indicating whether this data item has been deleted',
+                        \`entity_id\` int(10) unsigned NOT NULL COMMENT 'The entity id this data is attached to',
+                        \`revision_id\` int(10) unsigned NOT NULL COMMENT 'The entity revision id this data is attached to',
+                        \`langcode\` varchar(32) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL DEFAULT '' COMMENT 'The language code for this data item.',
+                        \`delta\` int(10) unsigned NOT NULL COMMENT 'The sequence number for this data item, used for multi-value fields',
+                        \`field_${fieldName}_value\` varchar(255) NOT NULL,
+                        PRIMARY KEY (\`entity_id\`,\`deleted\`,\`delta\`,\`langcode\`),
+                        KEY \`bundle\` (\`bundle\`),
+                        KEY \`revision_id\` (\`revision_id\`)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Data storage for taxonomy_term field field_${fieldName}.';`
+        const response    = await db.query(sql);
+
+        const revSql = ` CREATE TABLE \`taxonomy_term_revision__field_${fieldName}\` (
+                            \`bundle\` varchar(128) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL DEFAULT '' COMMENT 'The field instance bundle to which this row belongs, used when deleting a field instance',
+                            \`deleted\` tinyint(4) NOT NULL DEFAULT 0 COMMENT 'A boolean indicating whether this data item has been deleted',
+                            \`entity_id\` int(10) unsigned NOT NULL COMMENT 'The entity id this data is attached to',
+                            \`revision_id\` int(10) unsigned NOT NULL COMMENT 'The entity revision id this data is attached to',
+                            \`langcode\` varchar(32) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL DEFAULT '' COMMENT 'The language code for this data item.',
+                            \`delta\` int(10) unsigned NOT NULL COMMENT 'The sequence number for this data item, used for multi-value fields',
+                            \`field_${fieldName}_value\` varchar(512) NOT NULL,
+                            PRIMARY KEY (\`entity_id\`,\`revision_id\`,\`deleted\`,\`delta\`,\`langcode\`),
+                            KEY \`bundle\` (\`bundle\`),
+                            KEY \`revision_id\` (\`revision_id\`)
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Revision archive storage for taxonomy_term field field…';`
+        
+        await db.query(revSql);
+        // if(!response.affectedRows) throw new Error(`dbQuery: NOT FOUND ... ${queryText} : values => ${JSOn.stringify(queryVars)}`)
+
+        // await releaseConnection(dbName)
+        return !!response.affectedRows
+    }catch(e){
+        consola.error(e)
+    } finally {
+        await releaseConnection(dbName)//release to pool
+    }
+}
+
 export const dbGet  =  async (dbName, queryString) =>{
 
     try{
