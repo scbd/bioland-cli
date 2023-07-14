@@ -3,8 +3,8 @@ import { execSync  }          from 'child_process'
 
 export default async (branch, commandArgs, { Util }) => {
 
-    const allSites  = Util.config.siteCodes
-    const done      = []
+    const allSites  = ['af','ag','ar','db','bo','bn','bz','ck','kr','dm','ec','fj','ki','kg','fm','mn','nr','np','nu','pg', 'py', 'qa','vc','sr','pa']
+    const done      = ['af']
     const sites     = allSites.filter((x)=> !done.includes(x))
 
     
@@ -14,7 +14,7 @@ export default async (branch, commandArgs, { Util }) => {
         execSync(`ddev drush @${countryCode} en samlauth -y`)
 
         await Util.setConfigObject(countryCode,'views.view.samlauth_map', getViewTemplate())
-        await Util.setConfigObject(countryCode,'samlauth.authentication', getConfigTemplateDev(countryCode))
+        await Util.setConfigObject(countryCode,'samlauth.authentication', getConfigTemplateDev(countryCode, Util))
 
 
         execSync(`ddev drush @${countryCode} cr`)
@@ -120,9 +120,32 @@ function getMappingsTemplate(){
         ignore_blocked: false
       }
 }
-function getConfigTemplateDev(code){
-    const entityId = `https://${code}.bioland.cbddev.xyz`;
-    const idpId = `https://accounts-saml.cbddev.xyz/saml`;
+
+function getEntityId(code, Util){
+  const isDev = process.argv.includes('-d')
+  const isTest = isTestEnv(code, Util)
+
+  if(hasRedirectTo(code, Util) && !isDev && !isTest) 
+      return `https://${hasRedirectTo(code)}`
+  else
+      return isDev? `https://${code}.bioland.cbddev.xyz` : 
+              isTest? `https://${code}.test.chm-cbd.net` : `https://${code}.chm-cbd.net`
+
+}
+
+function hasRedirectTo(code, Util){
+  return ( Util.config?.sites[code] || {})?.redirectTo
+}
+
+function isTestEnv(code, Util){
+  return ( Util.config?.sites[code] || {})?.environment
+}
+
+function getConfigTemplateDev(code, Util){
+    const isDev = process.argv.includes('-d')
+
+    const entityId = getEntityId(code, Util);
+    const idpId    = isDev? `https://accounts.cbddev.xyz/saml`: 'https://accounts.cbd.int/saml'
 
     return {                                                                                                                                               
         '_core': { default_config_hash: 'oDGEkhP0h5rXXqlDplxeBDre0goLigOJupHKMDMwcqM' },
@@ -151,7 +174,7 @@ function getConfigTemplateDev(code){
         idp_entity_id: idpId,
         idp_single_sign_on_service: `${idpId}/signin`,
         idp_single_log_out_service: '',
-        idp_change_password_service: `${idpId}/password/reset`,
+        idp_change_password_service: `${idpId.replace('/saml','')}/password/reset`,
         idp_certs: [
           'file:/var/www/html/idp.crt'
         ],

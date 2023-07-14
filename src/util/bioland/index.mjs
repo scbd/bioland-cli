@@ -7,7 +7,7 @@ import { webCtx     }          from '../context.mjs'
 import consola from 'consola'
 import countryTimeZone from 'countries-and-timezones'
 import { execSync  }          from 'child_process'
-import { patchMenuUri, login } from '../drupal/json-api.mjs'
+import { patchMenuUri, login, jsonApiGet, patch } from '../drupal/json-api.mjs'
 import footerLinks from './footer-menu-content.mjs'
 import { backUpSite } from '../../tasks/back-up.mjs'
 import { isDev } from '../dev.mjs'
@@ -42,6 +42,7 @@ export async function initNewTestSite(country, loadSeed = true){
     await setTitleAndSlogan(country)
     await setLogo(country)
     await setFooterLinks(country)
+    await setNationalTargetCountry(country)
 }
 
 export function setFooterLinks(countryCode){
@@ -68,33 +69,28 @@ export async function setDefaultCountry(countryCode){
 
 }
 
-export async function enableGbifStats(countryCode){
-    execSync(`ddev drush @${countryCode} en gbifstats`)
-    execSync(`ddev drush @${countryCode} role-add-perm "anonymous" "'view GBIF Stats'"`)
-    execSync(`ddev drush @${countryCode} role-add-perm "authenticated" "'view GBIF Stats'"`)
-    execSync(`ddev drush @${countryCode} role-add-perm "content_manager" "'configure GBIF Stats','generate GBIF Stats'"`)
-    execSync(`ddev drush @${countryCode} role-add-perm "site_manager" "'generate GBIF Stats','configure GBIF Stats','generate GBIF Stats'"`) 
+export async function setNationalTargetCountry(countryCode){
+    const locale               = await getDefaultLocale(countryCode)
+    const defaultLocale        = locale === 'en'? '' : locale
 
-    consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: GBIF enabled`)
+    const { sites }  = config
+    const site = sites[countryCode]
+
+    const path        = 'node/landing_page_layout'
+    const id          = 'fb579f24-80d1-4b9f-8946-6ad7e8f292f4'
+    const needle      = `countries:[&apos;ph&apos;]`
+    const replacement = site.regions? `countries:${JSON.stringify(site.regions)}` : `countries:['${countryCode}']`
+
+    await login(countryCode)
+
+    const { type,  attributes } = (await jsonApiGet(countryCode, { path, id })).body.data;
+    const { body } = attributes;
+    const data = { data: { id,  type, attributes: { body: { value: body.value.replace(needle, replacement), format:'full_html' } }}};
+
+    await patch(countryCode, path, id, data, defaultLocale)
 }
 
 export async function setGbifStats(countryCode){
-
-    // const configObj   = (await getConfigObject(countryCode,'gbifstats.settings'))
-
-    // delete(configObj.gbifstats.node_name)
-    // delete(configObj.gbifstats.head_delegation)
-    // delete(configObj.gbifstats.website)
-    // delete(configObj.head_delegation)
-    // delete(configObj.gbifstats.node_manager)
-    // delete(configObj.gbifstats.link_page_GBIF)
-    // configObj.gbifstats.categories.last_dataset=0
-    // configObj.gbifstats.country_code=countryCode.toUpperCase()
-
-    // await setConfigObject(countryCode,'gbifstats.settings', configObj)
-
-    // execSync(`chromium-browser --headless --no-sandbox --verbose  --incognito  --ignore-certificate-errors --ignore-ssl-errors $(ddev drush @${countryCode} user:login --mail=bioland-sm@chm-cbd.net /gbifstats/generate/${countryCode.toUpperCase()})`)
-
     const locale               = await getDefaultLocale(countryCode)
     const defaultLocale        = locale === 'en'? '' : locale
     const countryExists        = !!(await getCountries())[countryCode]
@@ -121,11 +117,10 @@ export async function setEuCompliance(countryCode){
 
     const configObj2   = (await getConfigObject(countryCode,'google_analytics.settings'))
 
-    
-
     configObj2.codesnippet.before = `var gaCode = '${site.googleAnalyticsId}'; window['ga-disable-' + gaCode] = true; if(document.cookie.valueOf('cookie-agreed').indexOf("cookie-agreed=2")>=0) { window['ga-disable-' + gaCode] = false; }`
 
     await setConfigObject(countryCode,'google_analytics.settings', configObj2)
+
     consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: setEuCompliance`)
 }
 
@@ -133,7 +128,7 @@ export async function setGA(countryCode){
     const { sites }  = config
     const countryMap = await getCountries()
     const isCountry  = countryMap[countryCode]
-  
+
     if(!isCountry) return
 
     const site = sites[countryCode]
@@ -146,6 +141,8 @@ export async function setGA(countryCode){
     await setConfigObject(countryCode,'google_analytics.settings', configObj)
     consola.info(`${countryCode} - ${(await  getCountryNameByCode(countryCode))}: google analytics set`)
 }
+
+
 
 export async function setRegionalSettings(countryCode){
     const { sites }  = config

@@ -15,7 +15,7 @@ export { patchMenuUri, login, deleteMenu, enableJsonApi, patch, deleteNode, post
 export { setConfigObject, getConfigObject, createConfigObject, getDefaultLocale, enableJsonApiConfig } from './drupal/drupal-config.mjs'
 export { setKeyValue, getKeyValue } from './drupal/drupal-key-value.mjs'
 export { forEachSite, forEachTestSite, forEachProductionSite, forEachPtkMigratedSite } from './for-each-site.mjs'
-export { initNewTestSite, setTitleAndSlogan, setLogo, biolandFooterLabel, setRegionalSettings, setGA, setEuCompliance, setGbifStats, enableGbifStats, setDefaultCountry, setFooterLinks } from './bioland/index.mjs'
+export { setNationalTargetCountry, initNewTestSite, setTitleAndSlogan, setLogo, biolandFooterLabel, setRegionalSettings, setGA, setEuCompliance, setGbifStats, setDefaultCountry, setFooterLinks } from './bioland/index.mjs'
 export { changeUserPass, createUser, removeUser, addUserRole, removeUserRole } from './drupal/users.mjs'
 export { upsertDnsRecords, upsertAllDnsRecords, upsertAllProdDnsRecords, upsertAllTestDnsRecords, upsertAllDevDnsRecords, upsertAllRestoreDnsRecords } from './dns/index.mjs'
 export { ensureDev, isDev } from  './dev.mjs'
