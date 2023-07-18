@@ -46,6 +46,8 @@ export async function getDocumentData(id){
     return  bodies
 }
 
+
+
 export async function getDocTemplate(doc, { countryCode, docType, lang='en' }){
     const { adoptionDate, startDate, documentId } = doc
     
