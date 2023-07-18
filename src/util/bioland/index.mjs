@@ -29,8 +29,8 @@ export async function initNewTestSite(country, loadSeed = true, freshBack = true
         const seedFilesPath      = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest-files.tgz` : `/home/ubuntu/efs/bk-latest/seed-latest-files.tgz`
 
         if(freshBack) await backUpSite('seed')
-        
-        execSync(`gunzip  ${seedSqlPathZipped} -f`)
+
+        execSync(`gunzip -k ${seedSqlPathZipped} -f`)
         execSync(`ddev drush @${country} sql:cli < ${seedSqlPath}`)
         execSync(`mkdir -p /home/ubuntu/bioland/web/sites/${country}/files`)
         execSync(`tar -xvf  ${seedFilesPath} -C /home/ubuntu/bioland/web/sites/${country}/files`)
