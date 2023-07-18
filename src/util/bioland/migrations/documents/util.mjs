@@ -50,9 +50,9 @@ export async function getDocTemplate(doc, { countryCode, docType, lang='en' }){
     const { adoptionDate, startDate, documentId } = doc
     
     const   field_publication_date = startDate
-    const   title = doc.title.en
+    const   title = doc?.title?.en || doc?.title?.fr || doc?.title?.es || doc?.title?.ru || doc?.title?.ar || doc?.title?.zh
     const   uri   = `https://chm.cbd.int/database/record?documentID=${doc.documentId}`
-    const   alias = `/documents/${slug(doc?.title?.en || doc?.title?.fr || doc?.title?.es || doc?.title?.ru || doc?.title?.ar || doc?.title?.zh)}`
+    const   alias = `/documents/${slug(title)}`
 
     const countryId = await getDrupalCountryId('seed', countryCode)
     const bodyData  = { documentId, ...(await getFileParams(doc.documentLinks)) }
