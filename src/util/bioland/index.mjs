@@ -21,14 +21,15 @@ import { upsertAllTestDnsRecords          } from '../dns/index.mjs'
 //system.maintenance
 //system.menu.main
 
-export async function initNewTestSite(country, loadSeed = true){
+export async function initNewTestSite(country, loadSeed = true, freshBack = true){
     await upsertAllTestDnsRecords ();
     if(loadSeed){
         const seedSqlPathZipped = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql.gz` : `/home/ubuntu/efs/bk-latest/seed-latest.sql.gz`
         const seedSqlPath       = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql` : `/home/ubuntu/efs/bk-latest/seed-latest.sql`
         const seedFilesPath      = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest-files.tgz` : `/home/ubuntu/efs/bk-latest/seed-latest-files.tgz`
 
-        await backUpSite('seed')
+        if(freshBack) await backUpSite('seed')
+        
         execSync(`gunzip  ${seedSqlPathZipped} -f`)
         execSync(`ddev drush @${country} sql:cli < ${seedSqlPath}`)
         execSync(`mkdir -p /home/ubuntu/bioland/web/sites/${country}/files`)
