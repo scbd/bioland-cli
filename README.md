@@ -49,17 +49,28 @@ initTestSite
 1. ad site to config https://github.com/scbd/bioland-config.git, dev should be dev env https://github.com/scbd/bioland-config.git#dev and push
 2. ssh into server
 3. cd bioland && yarn clean-install - (pulls latest config)
-4. yarn bcli reload (-d)- updates drupal/ddev/reverse proxy with folder and config files
+4. yarn bcli reload (-d) - updates drupal/ddev/reverse proxy with folder and config files, (-d) for dev server
 5. ddev restart (load new configs)
-6. cp -R /home/ubuntu/bioland/web/sites/seed/files to /home/ubuntu/bioland/web/sites/${newSiteCode}/
-7. ddev drush @seed sql:dump --structure-tables-list=cache,cache_*,watchdog --gzip --result-file="seed.sql"
-8. mkdir /home/ubuntu/efs/temp -p && mv /home/ubuntu/bioland/web/seed.sql.gz /home/ubuntu/efs/temp/seed.sql.gz
-9. gunzip /home/ubuntu/efs/temp/seed.sql.gz
-10. ddev drush @${newSiteCode} sql:cli <  /home/ubuntu/efs/temp/seed.sql
-11. rm /home/ubuntu/efs/temp/seed.sql
-12. yarn bcli initTestSite ${newSiteCode}
-13. manual login to aws route 53 add site domain point to cdn.bioland.infra.cbd.int (different for dev)
-14. if custom url, have client cname the domain  to ${code}.bioland.infra.cbd.int and  point ${code}.bioland.infra.cbd.int to cdn.bioland.infra.cbd.int
-15. ddev drush @${newSiteCode} cr
-16. login, manually add remove languages
-17. manually add GA code
+6. yarn bcli initTestSite ${newSiteCode}
+7. if custom url, have client cname the domain  to ${code}.bioland.infra.cbd.int and  point ${code}.bioland.infra.cbd.int to cdn.bioland.infra.cbd.int
+8. ddev drush @${newSiteCode} cr
+9. login, manually add remove languages
+10. manually add GA code if not a country
+11. yarn bcli dataSync ${newSiteCode} - sync chm docs and national targets
+12. manually configure SAML
+
+
+SAML Config
+
+1. go to ${code}.test.chm-cbd.net/admin/config/people/saml 
+2. change 'Login redirect URL' from https://seed.chm-cbd.net to https://${code}.test.chm-cbd.net
+3. change 'Logout redirect URL' from https://seed.chm-cbd.net to https://${code}.test.chm-cbd.net
+4. change 'Entity ID' from  https://seed.chm-cbd.net to https://${code}.test.chm-cbd.net
+5. save the config
+6. in a local bioland directory, run 'yarn bcli generateSpList' which will create a file in that directory spList.js
+7. tunnel into the main swarm (us3 usually)
+8. create new secret, spList.${numberAny}.js and copy value of generated spList.js into your new secret
+9. go to the website-accounts service, and change the add the new secret you created with location '/usr/src/app/saml/service-providers/list.js'
+10. delete the old secret with the same location '	/usr/src/app/saml/service-providers/list.js'
+11. then apply changes
+12.  then test the saml
