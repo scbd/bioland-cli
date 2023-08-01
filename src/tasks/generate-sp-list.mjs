@@ -1,8 +1,8 @@
 import { notifyDone, runTask } from '../util/cli-feedback.mjs'
 import   config                from '../util/config.mjs'
-import { context as ctx     }          from '../util/context.mjs'
-import { writeFile } from '../util/files.mjs'
-import   consola               from 'consola'
+import { context    as ctx }   from '../util/context.mjs'
+import { writeFile  }          from '../util/files.mjs'
+import consola from 'consola'
 
 export default async(branch, args) => {
 
@@ -14,18 +14,18 @@ export default async(branch, args) => {
 }
 
 function generateSpList() {
-    const { siteCodes }        = config
     const serviceProviders = {}
 
-
-    for (const site of siteCodes){
+    for (const site of getAllCodes()){
         const entityId    = getEntityId(site);
         const metaDataUrl = getMetaDataUrl(site);
 
         serviceProviders[entityId] = metaDataUrl;
     }
 
-    writeFile (ctx, 'spList.js', `export default ${JSON.stringify(serviceProviders)}}`)
+consola.warn(Object.keys(serviceProviders).length)
+
+    writeFile (ctx, 'spList.js', `export default ${JSON.stringify(serviceProviders)}`)
 }
 
 function getMetaDataUrl(code){
@@ -57,14 +57,15 @@ function hasRedirectTo(code){
 }
 
 function isTestEnv(code){
+    if(!config?.sites[code]) return true
+
     return (config?.sites[code] || {})?.environment
 }
 
-// function writeFile (data) {
-//     const cleanData = 'export default ' +JSON.stringify(data)
+const countryCodes = ["ad","ae","ag","al","am","ao","ar","at","au","az","ba","bb","be","bd","bf","bg","bh","bi","bj","bn","bo","br","bs","bt","bw","by","bz","ca","cg","ch","cl","cf","ci","ck","cm","cn","co","cr","cu","cv","cy","cz","de","dj","dk","dm","dz","ee","eg","do","ec","er","es","et","fi","fj","fm","fr","ga","gd","ge","gh","gm","gn","gq","gr","gt","gw","gy","hn","hr","ht","hu","id","ie","il","in","iq","ir","is","it","jm","jo","jp","ke","kg","kh","ki","km","kn","kp","kr","kw","kz","lb","lr","ls","la","lc","li","lk","lt","lu","lv","ly","ma","mc","md","mg","mh","mk","ml","mm","mn","mr","mt","mu","mv","mw","mx","my","mz","na","ne","ng","ni","no","np","nr","nu","nz","om","pa","pe","pg","ph","pk","pl","pt","pw","py","qa","ro","rw","sd","se","ru","sa","sb","sc","sg","si","sl","sm","sn","so","sr","st","sz","td","sv","sy","tg","th","tj","tm","tn","to","tr","tt","tv","tz","ua","ug","uy","uz","gb","us","va","vc","ve","vn","vu","ws","ye","za","zm","cd","zw","af","nl","sk","tl","me","eu","ss","rs","ps"]
 
+function getAllCodes(){
+    const { siteCodes } = config
 
-//     fs.ensureFileSync(`${ctx}/saml/service-providers/bioland/list.js`)
-    
-//     return fs.writeFileSync(`${ctx}/saml/service-providers/bioland/list.js`, cleanData)
-// }
+    return Array.from(new Set([...siteCodes, ...countryCodes]))
+}
