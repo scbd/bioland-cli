@@ -21,14 +21,14 @@ import { upsertAllTestDnsRecords          } from '../dns/index.mjs'
 //system.maintenance
 //system.menu.main
 
-export async function initNewTestSite(country, { loadSeed, freshBack, upsertDNS } ={ loadSeed : true, freshBack: true, upsertDNS:true }){
+export async function initNewTestSite(country, { loadSeed, freshBackUp, upsertDNS } ={ loadSeed : true, freshBackUp: true, upsertDNS:true }){
     if(upsertDNS) await upsertAllTestDnsRecords ();
     if(loadSeed){
         const seedSqlPathZipped = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql.gz` : `/home/ubuntu/efs/bk-latest/seed-latest.sql.gz`
         const seedSqlPath       = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest.sql` : `/home/ubuntu/efs/bk-latest/seed-latest.sql`
         const seedFilesPath      = isDev()? `/home/ubuntu/efs-prod/bk-latest/seed-latest-files.tgz` : `/home/ubuntu/efs/bk-latest/seed-latest-files.tgz`
 
-        if(freshBack) await backUpSite('seed')
+        if(freshBackUp) await backUpSite('seed')
 
         execSync(`gunzip -k ${seedSqlPathZipped} -f`)
         execSync(`ddev drush @${country} sql:cli < ${seedSqlPath}`)

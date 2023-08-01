@@ -16,13 +16,12 @@ export default async(branch, args) => {
 
 
 async function init(site,loadSeed =  true) {
-  
 
   console.log('')
   consola.info(`Site: ${site} seed: ${loadSeed} -> initiating new test site`)
 
   try{
-    await initNewTestSite(site, loadSeed)
+    await initNewTestSite(site, { loadSeed, freshBack: true, upsertDNS: true })
 
     execSync(`cd ${webCtx}`)
     execSync(`ddev drush @${site} cr`)
