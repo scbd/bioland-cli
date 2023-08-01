@@ -56,21 +56,16 @@ initTestSite
 8. ddev drush @${newSiteCode} cr
 9. login, manually add remove languages
 10. manually add GA code if not a country
-11. yarn bcli dataSync ${newSiteCode} - sync chm docs and national targets
-12. manually configure SAML
+11. manually configure SAML - if not a country code such as 'asean'
 
 
-SAML Config
+SAML Config - if not a country code
 
-1. go to ${code}.test.chm-cbd.net/admin/config/people/saml 
-2. change 'Login redirect URL' from https://seed.chm-cbd.net to https://${code}.test.chm-cbd.net
-3. change 'Logout redirect URL' from https://seed.chm-cbd.net to https://${code}.test.chm-cbd.net
-4. change 'Entity ID' from  https://seed.chm-cbd.net to https://${code}.test.chm-cbd.net
-5. save the config
-6. in a local bioland directory, run 'yarn bcli generateSpList' which will create a file in that directory spList.js
-7. tunnel into the main swarm (us3 usually)
-8. create new secret, spList.${numberAny}.js and copy value of generated spList.js into your new secret
-9. go to the website-accounts service, and change the add the new secret you created with location '/usr/src/app/saml/service-providers/list.js'
-10. delete the old secret with the same location '	/usr/src/app/saml/service-providers/list.js'
-11. then apply changes
-12.  then test the saml
+
+1. in a local bioland directory, run 'yarn bcli generateSpList' which will create a file in that directory spList.js
+2. tunnel into the main swarm (us3 usually)
+3. create new secret, spList.${numberAny}.js and copy value of generated spList.js into your new secret
+4. go to the website-accounts service, and change the add the new secret you created with location '/usr/src/app/saml/service-providers/list.js'
+5. delete the old secret with the same location '	/usr/src/app/saml/service-providers/list.js'
+6. then apply changes
+7. then test the saml
