@@ -1,133 +1,127 @@
-import   urlFileSize                 from 'url-file-size'
-import   prettyBytes                 from 'pretty-bytes'
-import   slug                        from 'limax'
-import   request                     from 'superagent'
-import { chmDocumentTypesMap       } from '../maps/index.mjs'
-import { getDrupalCountryId        } from '../../../drupal/db.mjs'
-import { jsonApiLogin, jsonApiGet, jsonApiDelete } from '../../../drupal/json-api.mjs'
-import consola from 'consola'
+import urlFileSize from 'url-file-size';
+import prettyBytes from 'pretty-bytes';
+import slug from 'limax';
+import request from 'superagent';
+import { chmDocumentTypesMap } from '../maps/index.mjs';
+import { getDrupalCountryId } from '../../../drupal/db.mjs';
+import { jsonApiLogin, jsonApiGet, jsonApiDelete } from '../../../drupal/json-api.mjs';
+import consola from 'consola';
 
-export async function deleteDrupalDocuments(site, chmDocs, biolandDocs){
-    const toDeleteIds = await getDeleteIdentifiers(chmDocs, biolandDocs)
+export async function deleteDrupalDocuments (site, chmDocs, biolandDocs) {
+  const toDeleteIds = await getDeleteIdentifiers(chmDocs, biolandDocs);
 
-    if(!toDeleteIds?.length) return
+  if (!toDeleteIds?.length) return;
 
-    await jsonApiLogin(site)
+  await jsonApiLogin(site);
 
-    const deletePromises = []
+  const deletePromises = [];
 
-    for (const toDeleteId of toDeleteIds)
-        deletePromises.push(jsonApiDelete(site, { path: 'node/document', id: toDeleteId }))
+  for (const toDeleteId of toDeleteIds) { deletePromises.push(jsonApiDelete(site, { path: 'node/document', id: toDeleteId })); }
 
-    try {
-        await Promise.all(deletePromises)
-    } catch (error) {
-        
+  try {
+    await Promise.all(deletePromises);
+  } catch (error) {
+
+  }
+}
+
+export async function getDocumentData (id) {
+  const isMultipleIds = Array.isArray(id);
+  const identifiers = isMultipleIds ? id : [id];
+  const reqGetPromises = [];
+
+  for (const identifier of identifiers) {
+    const uri = `https://api.cbd.int/api/v2013/documents/${identifier}`;
+
+    reqGetPromises.push(request.get(uri).set('accept', 'application/json'));
+  }
+
+  const bodies = (await Promise.all(reqGetPromises)).map(({ _body }) => _body);
+
+  for (let index = 0; index < bodies.length; index++) { bodies[index].documentId = identifiers[index]; }
+
+  return bodies;
+}
+
+export async function getDocTemplate (doc, { countryCode, docType, lang = 'en' }) {
+  const { startDate, documentId } = doc;
+
+  const field_publication_date = startDate; // eslint-disable-line camelcase
+  const title = doc?.title?.en || doc?.title?.fr || doc?.title?.es || doc?.title?.ru || doc?.title?.ar || doc?.title?.zh;
+  const uri = `https://chm.cbd.int/database/record?documentID=${doc.documentId}`;
+  const alias = `/documents/${slug(title)}`;
+
+  const countryId = await getDrupalCountryId('seed', countryCode);
+  const bodyData = { documentId, ...(await getFileParams(doc.documentLinks)) };
+  const body = generateBody(bodyData);
+
+  return {
+    type: 'node--document',
+    attributes: {
+      langcode: 'en',
+      revision_log: null,
+      title,
+      promote: false,
+      sticky: false,
+      default_langcode: true,
+      revision_translation_affected: true,
+      moderation_state: 'published',
+      metatag: null,
+      path: {
+        alias,
+        langcode: 'en'
+      },
+      content_translation_source: 'und',
+      content_translation_outdated: false,
+      body,
+      field_meta_tag: null,
+      field_publication_date, // eslint-disable-line camelcase
+      field_url: { uri }
+    },
+    relationships: {
+      field_document_type: {
+        data: {
+          type: 'taxonomy_term--document_types',
+          id: chmDocumentTypesMap[docType]
+        }
+      },
+      field_countries: {
+        data: {
+          type: 'taxonomy_term--countries',
+          id: countryId
+        }
+      }
     }
-    
+  };
 }
 
-export async function getDocumentData(id){
-    const isMultipleIds  = Array.isArray(id)
-    const identifiers    = isMultipleIds? id : [id]
-    const reqGetPromises = []
+export async function siteHasDocumentType (site, type) {
+  const path = 'node/document';
+  const drupalTaxId = chmDocumentTypesMap[type];
+  const query = `filter[field_document_type.id]=${drupalTaxId}`;
+  const { _body } = await jsonApiGet(site, { path, query });
 
-    for (const identifier of identifiers) {
-        const uri  = `https://api.cbd.int/api/v2013/documents/${identifier}`
-        
-        reqGetPromises.push(request.get(uri).set('accept', 'application/json'))
-    }
+  if (!_body || !_body.data || !_body.data.length) return false;
 
-    const bodies = (await Promise.all(reqGetPromises)).map(({ _body }) => _body)
-
-    for (let index = 0; index < bodies.length; index++)
-        bodies[index].documentId = identifiers[index]
-
-    return  bodies
+  return _body.data;
 }
 
+export async function getFileParams (fileLinks = [], lang = 'en') {
+  const [link] = fileLinks.filter(({ name }) => name?.includes(`-${lang}`));
 
+  if (!link) return consola.warn('No files found in chm');// throw new Error('nbsaps.getFileParams no file data found')
 
-export async function getDocTemplate(doc, { countryCode, docType, lang='en' }){
-    const { adoptionDate, startDate, documentId } = doc
-    
-    const   field_publication_date = startDate
-    const   title = doc?.title?.en || doc?.title?.fr || doc?.title?.es || doc?.title?.ru || doc?.title?.ar || doc?.title?.zh
-    const   uri   = `https://chm.cbd.int/database/record?documentID=${doc.documentId}`
-    const   alias = `/documents/${slug(title)}`
+  const { name, url } = link;
 
-    const countryId = await getDrupalCountryId('seed', countryCode)
-    const bodyData  = { documentId, ...(await getFileParams(doc.documentLinks)) }
-    const body      = generateBody(bodyData)
+  const size = prettyBytes(await urlFileSize(url));
 
-
-    return { type: 'node--document',
-                attributes: {
-                    langcode: 'en',
-                    revision_log: null,
-                    title,
-                    promote: false,
-                    sticky: false,
-                    default_langcode: true,
-                    revision_translation_affected: true,
-                    moderation_state: 'published',
-                    metatag: null,
-                    path: {
-                        alias,
-                        langcode: 'en'
-                    },
-                    content_translation_source: 'und',
-                    content_translation_outdated: false,
-                    body,
-                    field_meta_tag: null,
-                    field_publication_date,
-                    field_url: { uri }
-                },
-                relationships: {
-                    field_document_type: {
-                        data: {
-                            type: 'taxonomy_term--document_types',
-                            id: chmDocumentTypesMap[docType]
-                        }
-                    },
-                    field_countries: {
-                        data: {
-                            type: 'taxonomy_term--countries',
-                            id: countryId
-                        }
-                    }
-                }
-    }
+  return { uri: url, size, name, url };
 }
 
-export async function siteHasDocumentType(site, type){
-    const  path        = 'node/document'
-    const  drupalTaxId = chmDocumentTypesMap[ type ]
-    const  query       = `filter[field_document_type.id]=${drupalTaxId}`
-    const { _body }    = await jsonApiGet(site, { path, query })
-
-    if(!_body || !_body.data || !_body.data.length) return false
-    
-    return _body.data
-}
-
-export async function getFileParams(fileLinks=[], lang = 'en'){
-
-    const [ link ] = fileLinks.filter(({ name }) => name?.includes(`-${lang}`))
-
-    if(!link) return consola.warn('No files found in chm')//throw new Error('nbsaps.getFileParams no file data found')
-
-    const { name, url } = link
-
-    const size = prettyBytes(await urlFileSize(url))
-
-    return { uri: url, size, name, url }
-}
-
-export function generateBody({ uri, name, size }){
-    if(!uri || !name || !size) return null
-    return {
-            value: `
+export function generateBody ({ uri, name, size }) {
+  if (!uri || !name || !size) return null;
+  return {
+    value: `
             <br>
                 <div class="field--items">
                     <div class="field--item">
@@ -143,24 +137,23 @@ export function generateBody({ uri, name, size }){
                     </div>
                 </div>
                 `,
-            format: 'full_html'
-        }
+    format: 'full_html'
+  };
 }
 
-async function getDeleteIdentifiers(chmDocs=[], biolandDocs=[]){
-    const chmDocIds           = chmDocs? chmDocs.map( ({ _documentId_i }) => _documentId_i) : []
-    const toDeleteBiolandDocs = chmDocIds.length? biolandDocs.filter(({ attributes }) => stringIncludes(attributes?.field_url?.uri, chmDocIds )) : biolandDocs
-    const toDeleteIds         =  toDeleteBiolandDocs?.length? toDeleteBiolandDocs.map(({ id })=> id) : []
-    
-    if(!toDeleteIds.length) return null
+async function getDeleteIdentifiers (chmDocs = [], biolandDocs = []) {
+  const chmDocIds = chmDocs ? chmDocs.map(({ _documentId_i }) => _documentId_i) : []; // eslint-disable-line camelcase
+  const toDeleteBiolandDocs = chmDocIds.length ? biolandDocs.filter(({ attributes }) => stringIncludes(attributes?.field_url?.uri, chmDocIds)) : biolandDocs;
+  const toDeleteIds = toDeleteBiolandDocs?.length ? toDeleteBiolandDocs.map(({ id }) => id) : [];
 
-    return toDeleteIds
+  if (!toDeleteIds.length) return null;
+
+  return toDeleteIds;
 }
 
-function stringIncludes(hayStack,  needles){
-    if(!hayStack) return false
-    for (const needle of needles)
-        if(hayStack.includes(needle)) return true
+function stringIncludes (hayStack, needles) {
+  if (!hayStack) return false;
+  for (const needle of needles) { if (hayStack.includes(needle)) return true; }
 
-    return false
+  return false;
 }

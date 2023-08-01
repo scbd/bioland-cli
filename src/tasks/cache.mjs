@@ -1,43 +1,36 @@
-import { notifyDone, runTask } from '../util/cli-feedback.mjs'
-import { execSync   }          from 'child_process'
-import   config                from '../util/config.mjs'
-import { webCtx     }          from '../util/context.mjs'
-import   consola               from 'consola'
+import { notifyDone, runTask } from '../util/cli-feedback.mjs';
+import { execSync } from 'child_process';
+import config from '../util/config.mjs';
+import { webCtx } from '../util/context.mjs';
+import consola from 'consola';
 
-export default async(branch, args) => {
+export default async (branch, args) => {
+  if (args.length) { await (runTask(branch))(cache, `${branch.toUpperCase()}: Rebuilding cache site: ${args[0]}`, args); } else { await (runTask(branch))(cacheAll, `${branch.toUpperCase()}: Rebuilding cache  ALL sites`); }
 
-  if(args.length)
-    await (runTask(branch))(cache, `${branch.toUpperCase()}: Rebuilding cache site: ${args[0]}`, args)
-  else
-    await (runTask(branch))(cacheAll, `${branch.toUpperCase()}: Rebuilding cache  ALL sites`)
+  notifyDone()();
+  process.exit(0);
+};
 
-  notifyDone()()
-  process.exit(0)
+function cacheAll () {
+  const { sites } = config;
+
+  execSync(`cd ${webCtx}`);
+
+  for (const site in sites) { cache(site); }
 }
 
-function cacheAll() {
-  const { sites } = config
+function cache (site) {
+  execSync(`cd ${webCtx}`);
 
-  execSync(`cd ${webCtx}`)
+  console.log('');
+  consola.info(`Site: ${site} -> rebuilding cache`);
 
-  for (const site in sites)
-    cache( site)
-}
+  try {
+    execSync(`ddev drush @${site} cr`);
 
-
-function cache(site) {
-  execSync(`cd ${webCtx}`)
-
-  console.log('')
-  consola.info(`Site: ${site} -> rebuilding cache`)
-
-  try{
-    execSync(`ddev drush @${site} cr`)
-
-    console.log('')
-    consola.info(`${site}: cache rebuilt`)
-  }catch(e){
-    consola.error(`${site}: cache rebuild error`, e)
+    console.log('');
+    consola.info(`${site}: cache rebuilt`);
+  } catch (e) {
+    consola.error(`${site}: cache rebuild error`, e);
   }
-
 }

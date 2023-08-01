@@ -1,47 +1,43 @@
-import consola from 'consola'
-import   request    from 'superagent'
-import   allCodes   from './all-country-codes.mjs'
+import request from 'superagent';
+import allCodes from './all-country-codes.mjs';
 
-const globals = {}
+const globals = {};
 
-export const getCountries = async ()=>{
-  if(globals.cMap) return globals.cMap
+export const getCountries = async () => {
+  if (globals.cMap) return globals.cMap;
 
   const data = await request.get('https://api.cbd.int/api/v2015/countries/')
-                      .then(({ body }) => body)
+    .then(({ body }) => body);
 
-  const cMap = {}
+  const cMap = {};
 
   for (const aCountry of data) {
-    cMap[aCountry.code.toLowerCase()] = aCountry
+    cMap[aCountry.code.toLowerCase()] = aCountry;
   }
 
-  globals.cMap = cMap
+  globals.cMap = cMap;
 
-  return cMap
-}
+  return cMap;
+};
 
-export const getCountryNameByCode = async(code, locale = 'en') => {
-  const countriesData = await getCountries()
-  const country       = countriesData[code.toLowerCase()]
+export const getCountryNameByCode = async (code, locale = 'en') => {
+  const countriesData = await getCountries();
+  const country = countriesData[code.toLowerCase()];
 
-  if(!country) return code//throw new Error(`getCountryName: country not found code = ${code}`)
+  if (!country) return code;// throw new Error(`getCountryName: country not found code = ${code}`)
 
-  return country.name[locale.toLowerCase()]
-}
+  return country.name[locale.toLowerCase()];
+};
 
+export const getIsoAlpha3 = (code) => {
+  if (code === 'eu') return 'EU';
+  if (code === 'acb') return 'PHL';
 
+  if (!code) throw new Error('getIsoAlpha3: passed code undefined');
 
-export const getIsoAlpha3 = (code) =>{
-  if(code==='eu') return 'EU'
-  if(code==='acb') return 'PHL'
-  
+  const country = (allCodes.filter((c) => c['alpha-2'] === code.toUpperCase()))[0];
 
-  if(!code) throw new Error('getIsoAlpha3: passed code undefined')
+  if (!country) return 'FJI';
 
-  const country = (allCodes.filter((c) => c['alpha-2'] === code.toUpperCase()))[0]
-
-  if(!country) return 'FJI'
-
-  return country['alpha-3']
-}
+  return country['alpha-3'];
+};

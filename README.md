@@ -55,8 +55,8 @@ initTestSite
 7. if custom url, have client cname the domain  to ${code}.bioland.infra.cbd.int and  point ${code}.bioland.infra.cbd.int to cdn.bioland.infra.cbd.int
 8. ddev drush @${newSiteCode} cr
 9. login, manually add remove languages
-10. manually add GA code if not a country
-11. manually configure SAML - if not a country code such as 'asean'
+10. manually add GA code - (if not a country)
+11. manually configure SAML - (if not a country code such as 'asean')
 
 
 SAML Config - if not a country code

@@ -1,49 +1,49 @@
-import { notifyDone            , runTask } from '../util/cli-feedback.mjs'
-import { initDdevConfig                  } from './reload/ddev-config.mjs'
-import { initDrushConfig                 } from './reload/drush-config.mjs'
-import { initSites                       } from './reload/sites.mjs'
-import { initDockerOverride              } from './reload/docker-override.mjs'
-import { ensureDev            , isDev    } from '../util/dev.mjs'
-import { upsertAllDevDnsRecords          } from '../util/dns/index.mjs'
-import { execSync                        } from 'child_process'
-import   config                    from '../util/config.mjs'
-import consola from 'consola'
+import { notifyDone, runTask } from '../util/cli-feedback.mjs';
+import { initDdevConfig } from './reload/ddev-config.mjs';
+import { initDrushConfig } from './reload/drush-config.mjs';
+import { initSites } from './reload/sites.mjs';
+import { initDockerOverride } from './reload/docker-override.mjs';
+import { ensureDev, isDev } from '../util/dev.mjs';
+import { upsertAllDevDnsRecords } from '../util/dns/index.mjs';
+import { execSync } from 'child_process';
+import config from '../util/config.mjs';
+import consola from 'consola';
 
 export default async (branch, args = []) => {
-  await ensureDev()
+  await ensureDev();
 
-  if(!isDev(args)) args[0]= '-d'
+  if (!isDev(args)) args[0] = '-d';
 
-  await (runTask(branch))(initDdevConfig,     'writeDdevConfig'   , args)
-  await (runTask(branch))(initDrushConfig,    'initDrushConfig'   , args)
-  await (runTask(branch))(initSites,          'initSites'         , args)
-  await (runTask(branch))(initDockerOverride, 'initDockerOverride', args)
-  await (runTask(branch))(seed,               'seedDevFromProd'   , args)
+  await (runTask(branch))(initDdevConfig, 'writeDdevConfig', args);
+  await (runTask(branch))(initDrushConfig, 'initDrushConfig', args);
+  await (runTask(branch))(initSites, 'initSites', args);
+  await (runTask(branch))(initDockerOverride, 'initDockerOverride', args);
+  await (runTask(branch))(seed, 'seedDevFromProd', args);
 
-  notifyDone()()
-  process.exit(0)
-}
+  notifyDone()();
+  process.exit(0);
+};
 
 async function seed (branch, commandArgs) {
-  const sites = JSON.parse(JSON.stringify(config.siteCodes))
+  const sites = JSON.parse(JSON.stringify(config.siteCodes));
 
-  execSync('cd /home/ubuntu/bioland')
+  execSync('cd /home/ubuntu/bioland');
 
-  for (const countryCode of sites ){
-      execSync(`if test -f /home/ubuntu/efs-prod/bk-latest/${countryCode}-latest.sql.gz; then gunzip -fq /home/ubuntu/efs-prod/bk-latest/${countryCode}-latest.sql.gz; fi`)
-      execSync(`ddev drush @${countryCode} sql:cli < /home/ubuntu/efs-prod/bk-latest/${countryCode}-latest.sql`)
+  for (const countryCode of sites) {
+    execSync(`if test -f /home/ubuntu/efs-prod/bk-latest/${countryCode}-latest.sql.gz; then gunzip -fq /home/ubuntu/efs-prod/bk-latest/${countryCode}-latest.sql.gz; fi`);
+    execSync(`ddev drush @${countryCode} sql:cli < /home/ubuntu/efs-prod/bk-latest/${countryCode}-latest.sql`);
 
-      const destination = `/home/ubuntu/bioland/web/sites/${countryCode}`
-      const archive     = `/home/ubuntu/efs-prod/bk-latest/${countryCode}-latest-files.tgz`
+    const destination = `/home/ubuntu/bioland/web/sites/${countryCode}`;
+    const archive = `/home/ubuntu/efs-prod/bk-latest/${countryCode}-latest-files.tgz`;
 
-      execSync(`tar -xf ${archive} -C ${destination}`)
+    execSync(`tar -xf ${archive} -C ${destination}`);
 
-      consola.info(`Dev site ${countryCode}: files and sql loaded`)
+    consola.info(`Dev site ${countryCode}: files and sql loaded`);
   }
 
-  consola.info(`Updating route 53 DNS on all test sites`)
+  consola.info('Updating route 53 DNS on all test sites');
 
-  await upsertAllDevDnsRecords()
+  await upsertAllDevDnsRecords();
 
-  consola.info(`DNS updated on all dev sites: `, sites.length)
+  consola.info('DNS updated on all dev sites: ', sites.length);
 }

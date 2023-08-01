@@ -1,41 +1,32 @@
-import consola from 'consola'
-import config from './config.mjs'
+import config from './config.mjs';
 
-export const forEachSite = async(taskFunction) => {
+export const forEachSite = async (taskFunction) => {
+  const { siteCodes } = config;
 
-    const { siteCodes } = config
+  for (const siteCode of siteCodes) { await taskFunction(siteCode); }
+};
 
-    for (const siteCode of siteCodes)
-        await taskFunction(siteCode)
-}
+export const forEachTestSite = async (taskFunction) => {
+  const { sites, siteCodes } = config;
 
-export const forEachTestSite = async(taskFunction) => {
+  const testSites = siteCodes.filter((code) => sites[code].environment === 'test');
 
-    const { sites, siteCodes } = config
+  for (const siteCode of testSites) { await taskFunction(siteCode); }
+};
 
-    const testSites = siteCodes.filter( (code) => sites[code].environment === 'test')
+export const forEachProductionSite = async (taskFunction) => {
+  const { sites, siteCodes } = config;
 
-    for (const siteCode of testSites)
-        await taskFunction(siteCode)
-}
+  const prodSites = siteCodes.filter((code) => !sites[code].environment);
 
-export const forEachProductionSite = async(taskFunction) => {
+  for (const siteCode of prodSites) { await taskFunction(siteCode); }
+};
 
-    const { sites, siteCodes } = config
+export const forEachPtkMigratedSite = async (taskFunction) => {
+  const sites = 'cf cg et ga iq km ml mr mu rw sd tz ye zm'.split(' ');
 
-    const prodSites = siteCodes.filter( (code) => !sites[code].environment)
-    
-    for (const siteCode of prodSites)
-        await taskFunction(siteCode)
-}
-
-export const forEachPtkMigratedSite = async(taskFunction) => {
-
-    const sites = 'cf cg et ga iq km ml mr mu rw sd tz ye zm'.split(' ')
-
-    for (const siteCode of sites){
-        // consola.error(siteCode)
-        taskFunction(siteCode)
-    }
-
-}
+  for (const siteCode of sites) {
+    // consola.error(siteCode)
+    taskFunction(siteCode);
+  }
+};

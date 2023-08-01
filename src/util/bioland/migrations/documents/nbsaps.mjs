@@ -1,58 +1,55 @@
-import   consola                from 'consola'
-import { getChmDocuments      } from '../util.mjs'
-import { getCountryNameByCode } from '../../../countries.mjs'
-import { isDev                } from '../../../commands.mjs'
-import { login, jsonApiPost } from '../../../drupal/json-api.mjs'//680ae691-c273-4eda-a9f2-b6630d67201b
+import consola from 'consola';
+import { getChmDocuments } from '../util.mjs';
+import { getCountryNameByCode } from '../../../countries.mjs';
+import { isDev } from '../../../commands.mjs';
+import { login, jsonApiPost } from '../../../drupal/json-api.mjs';// 680ae691-c273-4eda-a9f2-b6630d67201b
 
-import { siteHasDocumentType, getDocumentData, deleteDrupalDocuments, getDocTemplate } from './util.mjs'
+import { siteHasDocumentType, getDocumentData, deleteDrupalDocuments, getDocTemplate } from './util.mjs';
 
-export default async function (site, { defaultCountry = 'fj', forceCountry, deleteOnly = false } = {}){
-    const siteIsCountry = await getCountryNameByCode(site)
+export default async function (site, { defaultCountry = 'fj', forceCountry, deleteOnly = false } = {}) {
+  const siteIsCountry = await getCountryNameByCode(site);
 
-    if(!siteIsCountry && !isDev()) return consola.warn(`Site: ${site} => NBSAP sync: nothing done, site not country`)
+  if (!siteIsCountry && !isDev()) return consola.warn(`Site: ${site} => NBSAP sync: nothing done, site not country`);
 
-    const countryIso2   = forceCountry? forceCountry : siteIsCountry?  site : defaultCountry
-    const chmNbsaps     = await chmHasNbsaps(site, countryIso2)
+  const countryIso2 = forceCountry || (siteIsCountry ? site : defaultCountry);
+  const chmNbsaps = await chmHasNbsaps(site, countryIso2);
 
-    if(!chmNbsaps) return
+  if (!chmNbsaps) return;
 
-    const siteNbsaps = await siteHasNbsaps(site)
+  const siteNbsaps = await siteHasNbsaps(site);
 
-//sync - delete then recreate
-    if(siteNbsaps) await deleteDrupalDocuments(site, chmNbsaps, siteNbsaps)
+  // sync - delete then recreate
+  if (siteNbsaps) await deleteDrupalDocuments(site, chmNbsaps, siteNbsaps);
 
-    if(deleteOnly) return 
+  if (deleteOnly) return;
 
-    const chmDocIds       = chmNbsaps.map( ({ _documentId_i }) => _documentId_i)
-    const chmDocumentData = await getDocumentData(chmDocIds)
-    const countryCode     = countryIso2
+  const chmDocIds = chmNbsaps.map(({ _documentId_i }) => _documentId_i); // eslint-disable-line camelcase
+  const chmDocumentData = await getDocumentData(chmDocIds);
+  const countryCode = countryIso2;
 
-    for (const docData of chmDocumentData) { 
-        const data = await getDocTemplate(docData, { countryCode, docType: 'nbsap' })
+  for (const docData of chmDocumentData) {
+    const data = await getDocTemplate(docData, { countryCode, docType: 'nbsap' });
 
-       // consola.warn('data', data)
-        await postDoc(site, { path: 'node/document', data })
-    }
-
+    // consola.warn('data', data)
+    await postDoc(site, { path: 'node/document', data });
+  }
 }
 
-async function postDoc(site, { path, data, locale='' }){
-    await login(site)
-    return jsonApiPost(site, { path, data, locale })
+async function postDoc (site, { path, data, locale = '' }) {
+  await login(site);
+  return jsonApiPost(site, { path, data, locale });
 }
 
-async function siteHasNbsaps(site){
-    return siteHasDocumentType(site, 'nbsap')
+async function siteHasNbsaps (site) {
+  return siteHasDocumentType(site, 'nbsap');
 }
 
-async function chmHasNbsaps(site, forceCountry){
-    const isCountryCode = !!await getCountryNameByCode(site)
-    const countryCode   = isCountryCode? site : forceCountry || site
-    const resp          = await getChmDocuments(countryCode,'nationalReport', 'NBSAP')
+async function chmHasNbsaps (site, forceCountry) {
+  const isCountryCode = !!await getCountryNameByCode(site);
+  const countryCode = isCountryCode ? site : forceCountry || site;
+  const resp = await getChmDocuments(countryCode, 'nationalReport', 'NBSAP');
 
-    if(resp.length) return resp
-    
-    return false
+  if (resp.length) return resp;
+
+  return false;
 }
-
-
