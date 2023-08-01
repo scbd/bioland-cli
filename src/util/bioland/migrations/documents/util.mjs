@@ -111,7 +111,7 @@ export async function siteHasDocumentType(site, type){
     return _body.data
 }
 
-export async function getFileParams(fileLinks, lang = 'en'){
+export async function getFileParams(fileLinks=[], lang = 'en'){
 
     const [ link ] = fileLinks.filter(({ name }) => name?.includes(`-${lang}`))
 
