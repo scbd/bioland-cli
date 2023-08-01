@@ -12,6 +12,9 @@ import footerLinks from './footer-menu-content.mjs'
 import { backUpSite } from '../../tasks/back-up.mjs'
 import { isDev } from '../dev.mjs'
 import { upsertAllTestDnsRecords          } from '../dns/index.mjs'
+import samlConfig from './saml.mjs';
+import { syncNbsaps, syncNationalReports, syncNationalTargets } from './migrations/index.mjs'
+
 //eu_cookie_compliance.settings
 //gbifstats.settings
 //geolocation.settings
@@ -44,6 +47,10 @@ export async function initNewTestSite(country, { loadSeed, freshBackUp, upsertDN
     await setLogo(country)
     await setFooterLinks(country)
     await setNationalTargetCountry(country)
+    await samlConfig(country)
+    await syncNbsaps(site, { deleteOnly: false })
+    await syncNationalReports(site, { deleteOnly: false })
+    await syncNationalTargets(site, {  deleteOnly: false })
 }
 
 export function setFooterLinks(countryCode){
