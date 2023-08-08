@@ -41,9 +41,9 @@ export async function createConfigObject (code, name, configObject, locale = '')
 
     return !!response.affectedRows;
   } catch (e) {
-    consola.error(e);
+    // consola.error(e);
   } finally {
-    await releaseConnection(code);
+    // await releaseConnection(code);
   }
 }
 

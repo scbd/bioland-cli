@@ -4,6 +4,7 @@
   "main": "src/index.mjs",
   "license": "MIT",
   "scripts": {
+    "lint": "eslint . --ext .js,.mjs --fix",
     "clean-install": "if test -f yarn.lock; then rm yarn.lock; fi && if test -f node_modules; then rm -rf node_modules; fi && yarn install --force"
   },
   "dependencies": {

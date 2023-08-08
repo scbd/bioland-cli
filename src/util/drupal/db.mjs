@@ -70,6 +70,25 @@ export const dbSet = async (dbName, queryText, queryVars) => {
   }
 };
 
+export const dbBatch = async (dbName, queryText, queryVars) => {
+  try {
+    await getPool(dbName);
+
+    const db = await getConnection(dbName);
+
+    const response = await db.batch(queryText, queryVars);
+
+    if (!response.affectedRows) throw new Error(`dbBatch: NOT FOUND ... ${queryText} : values => ${JSON.stringify(queryVars)}`);
+
+    // await releaseConnection(dbName)
+    return !!response.affectedRows;
+  } catch (e) {
+    consola.error(e);
+  } finally {
+    await releaseConnection(dbName);// release to pool
+  }
+};
+
 export const dbCreateTaxonomyFieldTable = async (dbName, fieldName, type = 'varchar(512)') => {
   try {
     await getPool(dbName);
