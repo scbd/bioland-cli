@@ -17,7 +17,7 @@ async function init (site, loadSeed = true) {
   consola.info(`Site: ${site} seed: ${loadSeed} -> initiating new test site`);
 
   try {
-    await initNewTestSite(site, { loadSeed, freshBack: true, upsertDNS: true });
+    await initNewTestSite(site, { loadSeed, freshBack: true, upsertDNS: false });
 
     execSync(`cd ${webCtx}`);
     execSync(`ddev drush @${site} cr`);

@@ -24,7 +24,7 @@ import { syncNbsaps, syncNationalReports, syncNationalTargets } from './migratio
 // system.maintenance
 // system.menu.main
 
-export async function initNewTestSite (country, { loadSeed, freshBackUp, upsertDNS } = { loadSeed: true, freshBackUp: true, upsertDNS: true }) {
+export async function initNewTestSite (country, { loadSeed, freshBackUp, upsertDNS } = { loadSeed: true, freshBackUp: true, upsertDNS: false }) {
   if (upsertDNS) await upsertAllTestDnsRecords();
   if (loadSeed) {
     const seedSqlPathZipped = isDev() ? '/home/ubuntu/efs-prod/bk-latest/seed-latest.sql.gz' : '/home/ubuntu/efs/bk-latest/seed-latest.sql.gz';
